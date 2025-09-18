@@ -10,6 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/worksheet") // 권장: 루트 대신 명확한 베이스 경로
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // Vite dev 서버 주소
 public class WorkSheetController {
     private final WorkSheetService service;
 
