@@ -13,8 +13,7 @@
             <th class="px-3 py-2 text-right">수량</th>
             <th class="px-3 py-2 text-center">상태</th>
             <th class="px-3 py-2 text-center">우선순위</th>
-            <th class="px-3 py-2 text-center">시작시간</th>
-            <th class="px-3 py-2 text-center">종료시간</th>
+            <th class="px-3 py-2 text-center">납기일</th>
             <th class="px-3 py-2 text-center">작업</th>
           </tr>
         </thead>
@@ -24,17 +23,17 @@
             <td class="px-3 py-2">{{ order.partName }}</td>
             <td class="px-3 py-2 text-right">{{ order.qty }}</td>
             <td class="px-3 py-2 text-center">
-              <span :class="statusClass(order.workStatus)" class="badge">
-                {{ order.workStatus }}
+              <span :class="[statusClass(order.workStatus), 'badge']">
+                {{ statusLabel(order.workStatus) }}   <!-- ✅ 글자로 출력 -->
               </span>
             </td>
             <td class="px-3 py-2 text-center">
-              <span :class="priorityClass(order.priority)" class="badge">
-                {{ order.priority }}
+              <span :class="[priorityClass(order.priority), 'badge']">
+                {{ priorityLabel(order.priority) }}   <!-- ✅ 글자로 출력 -->
               </span>
             </td>
-            <td class="px-3 py-2 text-center">{{ order.startTime || '-' }}</td>
-            <td class="px-3 py-2 text-center">{{ order.endTime || '-' }}</td>
+            <td class="px-3 py-2 text-center">{{ order.deadline }}</td>
+
             <td class="px-3 py-2 text-center">
               <button class="btn-primary" @click="$emit('start', order.workNo)">작업시작</button>
             </td>
@@ -61,18 +60,34 @@ onMounted(async () => {
   orders.value = await fetchWorkOrders(processName.value)
 })
 
-function statusClass(s) {
-  if (s === '진행중') return 'badge-green'
-  if (s === '대기') return 'badge-yellow'
-  if (s === '완료') return 'badge-gray'
-  return 'badge-gray'
+// 상태 맵핑 (0=대기, 1=진행중, 2=완료)
+const statusMap = {
+  0: { label: '대기', class: 'badge-yellow' },
+  1: { label: '진행중', class: 'badge-green' },
+  2: { label: '완료', class: 'badge-gray' },
 }
 
-function priorityClass(p) {
-  if (p === '높음') return 'badge-red'
-  if (p === '보통') return 'badge-gray'
-  return 'badge-gray'
+// 우선순위 맵핑 (0=보통, 1=높음, 2=긴급)
+const priorityMap = {
+  0: { label: '보통', class: 'badge-gray' },
+  1: { label: '높음', class: 'badge-red' },
+  2: { label: '긴급', class: 'badge-yellow' },
 }
+
+function statusClass(code) {
+  return statusMap[code]?.class || 'badge-gray'
+}
+function statusLabel(code) {
+  return statusMap[code]?.label || '알수없음'
+}
+
+function priorityClass(code) {
+  return priorityMap[code]?.class || 'badge-gray'
+}
+function priorityLabel(code) {
+  return priorityMap[code]?.label || '알수없음'
+}
+
 </script>
 
 <style scoped>
