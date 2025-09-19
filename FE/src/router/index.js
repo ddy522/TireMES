@@ -14,8 +14,8 @@ const routes = [
   { path: '/', redirect: '/mixing' },
   { path: '/mixing', name: 'MixingList', component: MixingList },
   { path: '/mixing/:id', name: 'MixingDetail', component: MixingDetail, props: true },
-  { path: '/extrusion', name: 'ExtrusionList', component: ExtrusionList },         // ✅ 등록
-  { path: '/extrusion/:id', name: 'ExtrusionDetail', component: ExtrusionDetail, props: true }, // ✅ 등록
+  { path: '/extrusion', name: 'ExtrusionList', component: ExtrusionList },     
+  { path: '/extrusion/:id', name: 'ExtrusionDetail', component: ExtrusionDetail, props: true }, 
   { path: '/cutting', name: 'CuttingList', component: CuttingList },
   { path: '/cutting/:id', name: 'CuttingDetail', component: CuttingDetail, props: true },
   { path: '/inspection', name: 'InspectionList', component: InspectionList },
