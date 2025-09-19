@@ -1,9 +1,38 @@
 package com.example.demo.controller;
 
 
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.service.InsertLotService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
+@RequestMapping("/api/worksheet")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
+public class InsertLotController {
+    private final InsertLotService insertLotService;
 
-public class InsertController {
+    //Lotno 추가
+    @PostMapping("/insertLot")
+    public Map<String,Object> insertLot(@RequestBody Map<String, Object> param){
+        Map<String, Object> result = new HashMap<>();
+
+        String lotno = (String) param.get("lotNo");
+        String proc = (String) param.get("proc");
+
+        try {
+            insertLotService.insertLot(lotno, proc);
+            result.put("success", true);
+            result.put("message", "LOT 등록 성공!");
+        } catch(RuntimeException e){
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+
+        return result;
+
+    }
 }

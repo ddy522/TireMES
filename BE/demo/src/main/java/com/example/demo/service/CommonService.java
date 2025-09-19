@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.mappers.CommonMapper;
+import com.example.demo.mapper.CommonMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
