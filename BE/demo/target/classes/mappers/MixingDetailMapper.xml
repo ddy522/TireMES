@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.MixingDetailMapper">
+
+    <!-- 작업지시서 상세정보 조회 -->
+    <select id="selectWorksheetDetails" resultType="com.example.demo.model.MixingDetailWorksheet">
+        SELECT
+        w.work_no AS workNo,
+        w.work_state AS workState,
+        w.qty,
+        w.part_code AS partCode,
+        p.part_name AS partName
+        FROM worksheet w
+        LEFT JOIN part p ON w.part_code = p.part_code
+        WHERE w.work_no = #{workNo}
+    </select>
+
+    <!-- 작업번호로 BOM 상세정보 조회 -->
+    <select id="selectBomDetailsByWorkNo" resultType="com.example.demo.model.MixingDetailBom">
+        SELECT
+        h.part_code AS partCode,
+        d.child_part_code AS childPartCode,
+        p.part_name AS childPartName,
+        d.useage
+        FROM bom_h h
+        LEFT JOIN bom_d d ON h.skey = d.p_skey
+        LEFT JOIN part p ON d.child_part_code = p.part_code
+        WHERE h.part_code IN (
+        SELECT part_code
+        FROM worksheet
+        WHERE work_no = #{workNo}
+        )
+    </select>
+
+
+</mapper>
