@@ -22,7 +22,7 @@
         <option>보강재</option>
       </select>
       <button class="btn bg-white border">필터</button> -->
-      <button class="btn bg-white border" @click="exportCsv">내보내기</button>
+      <button class="btn bg-white border" @click="exportExcel">내보내기</button>
       <!-- <button class="btn-primary">+ 자재 등록</button> -->
     </div>
 
@@ -63,12 +63,55 @@
             <td class="px-3 py-2">{{ row.company }}</td>
             <td class="px-3 py-2">
               <div class="flex items-center gap-2">
-                <button class="btn bg-white border">상세</button>
+                <button class="btn bg-white border" @click="openDetail(row)">상세</button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- LOT 목록 모달 -->
+    <div v-if="lotModal.open" class="fixed inset-0 bg-black/50 flex justify-center items-start pt-20 z-50">
+      <div class="bg-white rounded-lg shadow-lg w-[640px] max-h-[80vh] overflow-y-auto p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h5 class="font-bold text-lg">{{ lotModal.partCode }} LOT 목록</h5>
+          <button @click="closeLotModal" class="text-gray-500 hover:text-gray-800">&times;</button>
+        </div>
+
+        <div class="mb-2 text-sm text-gray-500" v-if="lotModal.partName">
+          자재명: <span class="font-medium text-gray-700">{{ lotModal.partName }}</span>
+        </div>
+
+        <table class="w-full text-sm border border-gray-200">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border px-2 py-1 text-left">LOT 번호</th>
+              <th class="border px-2 py-1 text-left">로트일자</th>
+              <th class="border px-2 py-1 text-right">작업수량</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="lotModal.loading">
+              <td class="border px-2 py-4 text-center" colspan="4">불러오는 중…</td>
+            </tr>
+            <tr v-else-if="lotRows.length === 0">
+              <td class="border px-2 py-4 text-center" colspan="4">관련 LOT이 없습니다</td>
+            </tr>
+            <tr v-else v-for="r in lotRows" :key="r.lotNo">
+              <td class="border px-2 py-1">{{ r.lotNo }}</td>
+              <td class="border px-2 py-1">{{ r.createdAt }}</td>
+              <td class="border px-2 py-1 text-right">{{ fmtNumber(r.qty) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+
+
+
     </div>
   </div>
 </template>
@@ -77,6 +120,12 @@
 import { ref, computed, onMounted } from 'vue'
 // ✅ API 함수명 통일: inventoryListSearch.js에서 이렇게 export 하세요: export async function fetchInventoryAll() { ... }
 import { fetchInventoryAll } from '../../api/inventoryListSearch.js'
+import { fetchLotsByPartCode } from '../../api/inventoryLots.js'
+import KpiCard from './KpiCard.vue'
+import * as XLSX from 'xlsx'
+
+const lotModal = ref({ open: false, partCode: '', partName: '', loading: false })
+const lotRows  = ref([])
 
 const rows = ref([])
 const loading = ref(false)
@@ -115,6 +164,29 @@ function fmtNumber(n) {
   return Number.isFinite(v) ? v.toLocaleString() : n ?? '-'
 }
 
+// 상세 열기 → LOT API 호출
+async function openDetail(row) {
+  lotModal.value = {
+    open: true,
+    partCode: row.partCode,
+    partName: row.partName,
+    loading: true
+  }
+  lotRows.value = []
+  try {
+    lotRows.value = await fetchLotsByPartCode(row.partCode)
+  } catch (e) {
+    console.error(e)
+    lotRows.value = []
+  } finally {
+    lotModal.value.loading = false
+  }
+}
+
+function closeLotModal() {
+  lotModal.value.open = false
+}
+
 function exportCsv() {
   // 간단 CSV 내보내기 (원하면 실제 구현)
   const headers = ['partCode','partName','currInventory','safeQty','unit','stockStatus','company']
@@ -130,4 +202,55 @@ function exportCsv() {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+async function exportExcel() {
+  try {
+    // 1) 자재 시트 데이터 구성
+    const materials = filteredRows.value.map(r => ({
+      자재번호: r.partCode,
+      자재명: r.partName,
+      현재재고: Number(r.currInventory ?? 0),
+      안전재고: Number(r.safeQty ?? 0),
+      단위: r.unit ?? 'kg',
+      상태: (r.stockStatus ?? r.stockstatus ?? ''),
+      공급업체: r.company ?? ''
+    }))
+
+    // 2) LOT 시트 데이터 구성 (자재별 LOT API 호출)
+    const lotPromises = filteredRows.value.map(async r => {
+      const lots = await fetchLotsByPartCode(r.partCode)  // [{ lotNo, createdAt, qty, ... }]
+      return lots.map(l => ({
+        자재번호: r.partCode,
+        자재명: r.partName,
+        LOT번호: l.lotNo,
+        로트일자: l.createdAt,          // 백엔드에서 'YYYY-MM-DD HH:mm' 형식으로 내려오도록 했던 값
+        작업수량: Number(l.qty ?? 0)
+      }))
+    })
+    const lotResults = (await Promise.all(lotPromises)).flat()
+
+    // 3) 워크북/시트 생성
+    const wb = XLSX.utils.book_new()
+
+    const wsMaterials = XLSX.utils.json_to_sheet(materials)
+    wsMaterials['!cols'] = [
+      { wch: 14 }, { wch: 22 }, { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 18 }
+    ]
+    XLSX.utils.book_append_sheet(wb, wsMaterials, '자재')
+
+    const wsLots = XLSX.utils.json_to_sheet(lotResults)
+    wsLots['!cols'] = [
+      { wch: 14 }, { wch: 22 }, { wch: 18 }, { wch: 18 }, { wch: 10 }
+    ]
+    XLSX.utils.book_append_sheet(wb, wsLots, 'LOT')
+
+    // 4) 파일 저장
+    const date = new Date().toISOString().slice(0,10)
+    XLSX.writeFile(wb, `materials_with_lots_${date}.xlsx`)
+  } catch (err) {
+    console.error('엑셀 내보내기 실패:', err)
+    alert('엑셀 내보내기에 실패했습니다.')
+  }
+}
+
 </script>
