@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.InventoryLotTraceModel;
 import com.example.demo.model.InventoryModel;
+import com.example.demo.service.InventoryLotTraceService;
 import com.example.demo.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,13 @@ public class InventoryController {
         } else {
             return service.findByPartCodeLike(code);
         }
+    }
+
+    private final InventoryLotTraceService inventoryLotTraceService;
+
+    @GetMapping("/inventory/{partCode}/lots")
+    public List<InventoryLotTraceModel> getLotsByPartCode(@PathVariable String partCode) {
+        return inventoryLotTraceService.getLotsByPartCode(partCode);
     }
 
 

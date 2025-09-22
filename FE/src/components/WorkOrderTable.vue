@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchWorkOrders } from '../api/workOrderListSearch.js'
 
@@ -53,12 +53,28 @@ const orders = ref([])
 const route = useRoute()
 const processName = ref('전체')
 
-onMounted(async () => {
-  // path 기반으로 공정명 가져오기
+async function load() {
   const path = route.path.replace('/', '') // '/mixing' → 'mixing'
   processName.value = path || '전체'
   orders.value = await fetchWorkOrders(processName.value)
-})
+}
+
+onMounted(load)
+
+// ✅ 경로 바뀔 때마다 다시 불러오기
+watch(() => route.path, load)
+
+// onMounted(async () => {
+//   // path 기반으로 공정명 가져오기
+//   const path = route.path.replace('/', '') // '/mixing' → 'mixing'
+//   processName.value = path || '전체'
+//   orders.value = await fetchWorkOrders(processName.value)
+// })
+
+// // onMounted(load)
+
+// // // ✅ 경로 바뀔 때마다 다시 불러오기
+// // watch(() => route.path, load)
 
 // 상태 맵핑 (0=대기, 1=진행중, 2=완료)
 const statusMap = {

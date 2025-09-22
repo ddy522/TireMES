@@ -1,3 +1,5 @@
+<router-view :key="$route.path" />
+
 <template>
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
@@ -18,20 +20,20 @@
           압출
         </RouterLink>
 
-        <button class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/cutting">
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/cutting">
           <Package class="w-5 h-5 mr-2"/>
           재단
-        </button>
+        </RouterLink>
 
-        <button class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" disabled>
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/molding">
           <BarChart3 class="w-5 h-5 mr-2"/>
           성형
-        </button>
+        </RouterLink>
 
-        <button class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" disabled>
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/curing">
           <Zap class="w-5 h-5 mr-2"/>
           가류
-        </button>
+        </RouterLink>
 
         <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/inspection">
           <CheckCircle class="w-5 h-5 mr-2"/>
@@ -42,6 +44,12 @@
           <Truck class="w-5 h-5 mr-2"/>
           출하
         </button>
+
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/quality">
+          <Shield class="w-5 h-5 mr-2" />
+          품질 관리
+        </RouterLink>
+
 
         <RouterLink class="block w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/materials">
           자재 관리
