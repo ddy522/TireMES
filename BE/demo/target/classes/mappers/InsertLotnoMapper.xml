@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.InsertLotnoMapper">
+
+
+    <!-- 1. LOT와 작업지시 연결 여부 확인 -->
+    <select id="isLotLinkedToWorkOrder" resultType="boolean" parameterType="string">
+        SELECT count(w.work_no) > 0
+        FROM lot l
+        INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'
+        INNER JOIN worksheet w ON w.skey = s.p_skey
+        WHERE l.lotno = #{lotNo}
+    </select>
+
+    <!-- 2. 동일 work_no + process_code 존재 여부 확인 -->
+    <select id="existsWorkNoProcess" resultType="boolean" parameterType="map">
+            SELECT count(*)>0
+            FROM worksheet
+            WHERE work_no IN (
+                SELECT w.work_no
+                FROM lot l
+                INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'
+                INNER JOIN worksheet w ON w.skey = s.p_skey
+                WHERE lotno =#{lotNo}
+
+            )
+            AND process_code IN (SELECT process_no FROM process WHERE process_name_eng = #{proc})
+
+    </select>
+
+    <!-- 3. LOT의 다음 공정 조회 -->
+    <select id="getNextProcess" resultType="string" parameterType="string">
+        SELECT process_name_eng
+        FROM process
+        WHERE process_no > (
+        SELECT process_no
+        FROM lot
+        WHERE lotno = #{lotNo}
+        LIMIT 1
+        )
+        ORDER BY process_no
+        LIMIT 1
+    </select>
+    <!-- MySQL 프로시저 호출 -->
+    <update id="insertLotProcedure" parameterType="map">
+        CALL insert_worksheet_by_lot(#{lotno}, #{proc});
+    </update>
+</mapper>
