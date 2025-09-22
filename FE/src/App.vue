@@ -72,6 +72,6 @@
 
 <script setup>
 import { 
-  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap 
+  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap, Shield
 } from 'lucide-vue-next'
 </script>
