@@ -6,9 +6,8 @@
     </div>
 
     <!-- LOT 스캔 안내 -->
-    <div class="card">
+    <!-- <div class="card">
       <h3 class="section-title flex items-center gap-2">
-        <!-- 아이콘 예시 (lucide-react로 교체 가능) -->
         LOT 스캔
       </h3>
       <p class="text-sm text-gray-600 mb-3">
@@ -23,7 +22,7 @@
         >
         <button class="btn-primary" @click="insertLot">등록</button>
       </div>
-    </div>
+    </div> -->
 
     
     <!-- 검색 영역 (일자 배치) -->
