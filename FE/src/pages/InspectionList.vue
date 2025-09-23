@@ -22,7 +22,7 @@
       </div>
     </div>
         <WorkOrderTable
-          @bulk-start="goInspectMany" 
+          @bulk-start="onBulkStart" 
     />
 
     <!-- <WorkOrderTable :orders="workOrders" @start="goDetail" /> -->
@@ -34,29 +34,55 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import WorkOrderTable from '../components/WorkOrderTable.vue'
+import { startInspectionOrders } from '../api/inspection.js'
+import axios from 'axios'
 
 const router = useRouter()
 const lotInput = ref('')
 
-function goInspectMany(workNos) {
-  // ✅ 선택된 workNos를 가지고 검사 상세 페이지로 이동
-  router.push({
-    name: 'InspectionDetail',
-    query: { workNos: workNos.join(',') }
-  })
+const tableRef = ref(null)
+
+async function onBulkStart({ workNos, runCount }) {
+  try {
+    // ✅ 선택된 작업지시 번호들과 작업 수(runCount) 서버에 전달
+    await axios.post('/api/inspection/start/bulk', { workNos, runCount })
+
+    // ✅ 성공 후 테이블 새로고침
+    tableRef.value?.reload?.()
+  } catch (err) {
+    console.error(err)
+    alert('작업 시작 요청 중 오류가 발생했습니다.')
+  }
 }
 
-// const workOrders = ref([
-//   { id: 'WO-2024-001', product: '타이어 A', qty: 100, status: '진행중', priority: '높음', start: '09:00', end: '17:00' },
-//   { id: 'WO-2024-002', product: '타이어 B', qty: 150, status: '대기', priority: '보통', start: '10:00', end: '18:00' },
-//   { id: 'WO-2024-003', product: '타이어 C', qty: 80,  status: '완료', priority: '낮음', start: '08:00', end: '16:00' },
-// ])
+// async function goInspectMany(workNos) {
+//   try {
+//     // 성공시 이동
+//     await startInspectionOrders(workNos)
+//     router.push({
+//       name: 'InspectionDetail',
+//       query: { workNos: workNos.join(',') }
+//     })
+//   } catch (e) {
+//     console.error(e)
+//     alert('검사 시작에 실패했습니다.')
+//   }
 
-// function goDetail(orderId) {
-//   router.push(`/inspection/${orderId}`)
+//   function searchLot() {
+//   if (!lotInput.value?.trim()) return
+//   router.push({
+//     name: 'InspectionDetail',
+//     query: { lot: lotInput.value.trim() }
+//   })
 // }
 
-// function searchLot() {
-//   if (lotInput.value) router.push('/inspection/WO-2024-001')
 // }
+// function goInspectMany(workNos) {
+//   // ✅ 선택된 workNos를 가지고 검사 상세 페이지로 이동
+//   router.push({
+//     name: 'InspectionDetail',
+//     query: { workNos: workNos.join(',') }
+//   })
+// }
+
 </script>

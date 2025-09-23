@@ -1,12 +1,13 @@
 <template>
   <div class="card">
+    <!-- 상단 타이틀/버튼 -->
     <div class="flex items-center justify-between mb-3">
       <div>
         <h3 class="font-semibold text-gray-900">작업지시 목록</h3>
         <p class="text-sm text-gray-500">현재 {{ processName }} 공정의 작업지시 현황</p>
       </div>
 
-      <!-- ✅ inspection 전용: 선택 작업 시작 버튼 -->
+      <!-- inspection 전용: 선택 작업 시작 -->
       <button
         v-if="isInspection"
         class="btn-primary flex items-center gap-2"
@@ -15,9 +16,21 @@
         title="선택된 모든 작업지시를 시작"
       >
         선택 작업 시작
-        <!-- <span class="badge badge-yellow" style="background:#eab308; color:#fff">
-          {{ selectedCount }}
-        </span> -->
+        <!-- <span class="badge badge-yellow">{{ selectedCount }}</span> -->
+      </button>
+
+      <!-- delivery 전용: 출고(전체/조건부) -->
+      <button
+        v-if="isDelivery"
+        class="btn-primary flex items-center gap-2"
+        :disabled="!canShip || loading"
+        @click="$emit('ship')"
+        title="진행중 10건 이상일 때만 출고 가능"
+      >
+        출고
+        <span class="badge" :class="canShip ? 'badge-green' : 'badge-gray'">
+          {{ runningCount }} / 10
+        </span>
       </button>
     </div>
 
@@ -25,7 +38,6 @@
     <div class="flex items-center gap-3 mb-3">
       <CommonSelect type="part"   label="품번" v-model="filters.partCode"  width="220px" />
       <CommonSelect type="status" label="상태" v-model="filters.workStatus" width="180px" />
-
       <input
         v-model="filters.workNo"
         placeholder="작업지시 번호"
@@ -35,14 +47,20 @@
       <button class="btn-primary" @click="onSearch">조회</button>
       <button class="border rounded px-3 py-2 text-sm" @click="onReset">초기화</button>
     </div>
-    
+
+    <!-- 테이블 -->
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="bg-gray-100 text-gray-700">
-            <!-- ✅ inspection 전용: 전체 선택 체크박스 -->
+            <!-- ✅ inspection 전용: 전체 선택 체크 -->
             <th v-if="isInspection" class="px-3 py-2 text-center w-10">
-              <input type="checkbox" :checked="allChecked" @change="toggleAll($event)" />
+              <input
+                type="checkbox"
+                :checked="allChecked"
+                @change="toggleAll($event)"
+                aria-label="전체 선택"
+              />
             </th>
             <th class="px-3 py-2 text-left">작업지시번호</th>
             <th class="px-3 py-2 text-left">제품명</th>
@@ -50,17 +68,22 @@
             <th class="px-3 py-2 text-center">상태</th>
             <th class="px-3 py-2 text-center">우선순위</th>
             <th class="px-3 py-2 text-center">납기일</th>
-            <th v-if="!isInspection" class="px-3 py-2 text-center">작업</th>
+            <!-- ✅ 액션 컬럼 헤더: inspection 제외 -->
+            <th v-if="!isInspection" class="px-3 py-2 text-center">
+              {{ isDelivery ? '출고' : '작업' }}
+            </th>
           </tr>
         </thead>
+
         <tbody>
           <tr v-for="order in orders" :key="order.workNo" class="border-t">
-            <!-- ✅ inspection 전용: 행 선택 체크박스 -->
+            <!-- ✅ inspection 전용: 행 선택 체크 -->
             <td v-if="isInspection" class="px-3 py-2 text-center">
               <input
                 type="checkbox"
                 :checked="selected.has(order.workNo)"
                 @change="toggleRow(order.workNo, $event)"
+                :aria-label="`Select ${order.workNo}`"
               />
             </td>
 
@@ -68,23 +91,43 @@
             <td class="px-3 py-2">{{ order.partName }}</td>
             <td class="px-3 py-2 text-right">{{ order.qty }}</td>
             <td class="px-3 py-2 text-center">
-              <span :class="[statusClass(order.workStatus), 'badge']">
-                {{ statusLabel(order.workStatus) }}   
+              <span :class="['badge', statusClass(order.workStatus)]">
+                {{ statusLabel(order.workStatus) }}
               </span>
             </td>
             <td class="px-3 py-2 text-center">
-              <span :class="[priorityClass(order.priority), 'badge']">
-                {{ priorityLabel(order.priority) }}  
+              <span :class="['badge', priorityClass(order.priority)]">
+                {{ priorityLabel(order.priority) }}
               </span>
             </td>
             <td class="px-3 py-2 text-center">{{ order.deadline }}</td>
 
+            <!-- ✅ inspection이 아닐 때만 액션 버튼 노출 -->
             <td v-if="!isInspection" class="px-3 py-2 text-center">
-              <button class="btn-primary" @click="$emit('start', order.workNo)">작업시작</button>
+              <button
+                v-if="!isDelivery"
+                class="btn-primary"
+                @click="$emit('start', order.workNo)"
+              >
+                작업시작
+              </button>
+
+              <button
+                v-else
+                class="btn-primary"
+                :disabled="!canShip || loading"
+                @click="$emit('ship', order.workNo)"
+              >
+                출고
+              </button>
             </td>
           </tr>
+
           <tr v-if="!loading && orders.length === 0">
-            <td :colspan="isInspection ? 8 : 7" class="px-3 py-6 text-center text-gray-500">데이터가 없습니다.</td>
+            <td :colspan="isInspection ? 7 : 8"
+                class="px-3 py-6 text-center text-gray-500">
+              데이터가 없습니다.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -98,9 +141,9 @@ import { useRoute } from 'vue-router'
 import { fetchWorkOrders, searchWorkOrders } from '../api/workOrderListSearch.js'
 import CommonSelect from './CommonSelect.vue'
 
-const emit = defineEmits(['start', 'bulk-start'])   // ✅ bulk-start 추가
+const emit = defineEmits(['start', 'bulk-start', 'ship'])
 
-// 상태
+/* ===== 상태 ===== */
 const loading = ref(false)
 const error   = ref(null)
 const orders  = ref([])
@@ -108,7 +151,7 @@ const orders  = ref([])
 const route = useRoute()
 const processName = ref('전체')
 
-// API 응답 정규화
+/* ===== 응답 정규화 ===== */
 function pickData(res) {
   if (!res) return []
   if (Array.isArray(res)) return res
@@ -116,21 +159,28 @@ function pickData(res) {
   return res.data?.content ?? res.data ?? []
 }
 
-// 검색 상태
+/* ===== 검색 상태 ===== */
 const filters = ref({
   processNameEng: '',
   partCode: '',
-  workStatus: '1',
+  workStatus: '1',   // 기본: 진행중
   workNo: ''
 })
-
 function getEngFromRoute() {
   const eng = (route.path || '').replace('/', '').toLowerCase()
   return eng || ''
 }
 
-const isInspection = computed(() => filters.value.processNameEng === 'inspection') // ✅
+const isInspection = computed(() => filters.value.processNameEng === 'inspection')
+const isDelivery   = computed(() => filters.value.processNameEng === 'delivery')
 
+/* 진행중(1) 카운트 & 출고 가능 */
+const runningCount = computed(() =>
+  orders.value.reduce((acc, o) => acc + (Number(o.workStatus) === 1 ? 1 : 0), 0)
+)
+const canShip = computed(() => runningCount.value >= 10)
+
+/* ===== 초기 로드/검색 ===== */
 async function loadInitial() {
   const eng = getEngFromRoute()
   processName.value = eng || '전체'
@@ -139,26 +189,16 @@ async function loadInitial() {
   loading.value = true
   error.value = null
   try {
-// 기본값 보장 (없으면 '1' 주입)
-   if (!filters.value.workStatus) filters.value.workStatus = '1'
-   // ✅ 항상 검색 API로, 진행중만 포함해서 호출
-   const payload = {
-     processNameEng: eng || '',
-     workStatus: filters.value.workStatus,     // '1'
-     partCode: filters.value.partCode || undefined,
-     workNo: filters.value.workNo || undefined,
-   }
-   Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k])
-   const res = await searchWorkOrders(payload)
-   orders.value = pickData(res)
-    // if (eng) {
-    //   const res = await searchWorkOrders({ processNameEng: eng })
-    //   orders.value = pickData(res)
-    // } else {
-    //   const res = await fetchWorkOrders('')
-    //   orders.value = pickData(res)
-    // }
-    // ✅ 데이터 로드 시 선택 초기화
+    if (!filters.value.workStatus) filters.value.workStatus = '1'
+    const payload = {
+      processNameEng: eng || '',
+      workStatus: filters.value.workStatus,
+      partCode: filters.value.partCode || undefined,
+      workNo: filters.value.workNo || undefined,
+    }
+    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k])
+    const res = await searchWorkOrders(payload)
+    orders.value = pickData(res)
     selected.value.clear()
   } catch (e) {
     console.error(e)
@@ -175,7 +215,7 @@ async function onSearch() {
   try {
     const res = await searchWorkOrders({ ...filters.value })
     orders.value = pickData(res)
-    selected.value.clear() // ✅ 검색 시에도 초기화
+    selected.value.clear()
   } catch (e) {
     console.error(e)
     error.value = e
@@ -198,7 +238,7 @@ function onReset() {
 onMounted(loadInitial)
 watch(() => route.path, loadInitial)
 
-// ====== 상태/우선순위 표시 유틸 ======
+/* ===== 표시 유틸 ===== */
 const statusMap = {
   0: { label: '대기',   class: 'badge-yellow' },
   1: { label: '진행중', class: 'badge-green'  },
@@ -209,16 +249,16 @@ const priorityMap = {
   1: { label: '높음', class: 'badge-red'    },
   2: { label: '긴급', class: 'badge-yellow' },
 }
-const toNum = (v) => (typeof v === 'string' ? Number(v) : v)
-const statusClass   = (code) => statusMap[toNum(code)]?.class ?? 'badge-gray'
-const statusLabel   = (code) => statusMap[toNum(code)]?.label ?? '알수없음'
-const priorityClass = (code) => priorityMap[toNum(code)]?.class ?? 'badge-gray'
-const priorityLabel = (code) => priorityMap[toNum(code)]?.label ?? '알수없음'
+const toNum = v => (typeof v === 'string' ? Number(v) : v)
+const statusClass   = code => statusMap[toNum(code)]?.class ?? 'badge-gray'
+const statusLabel   = code => statusMap[toNum(code)]?.label ?? '알수없음'
+const priorityClass = code => priorityMap[toNum(code)]?.class ?? 'badge-gray'
+const priorityLabel = code => priorityMap[toNum(code)]?.label ?? '알수없음'
 
-// ====== ✅ 선택/일괄 시작 로직 ======
+/* ===== ✅ 선택/일괄 시작 ===== */
 const selected = ref(new Set()) // workNo 집합
-
 const selectedCount = computed(() => selected.value.size)
+
 const allChecked = computed(() => {
   if (!orders.value.length) return false
   return selected.value.size === orders.value.length
@@ -238,8 +278,16 @@ function toggleAll(ev) {
 
 function emitBulkStart() {
   if (selected.value.size === 0) return
-  emit('bulk-start', Array.from(selected.value)) // ✅ 부모에서 일괄 시작 처리
+  emit('bulk-start', {
+    workNos: Array.from(selected.value), 
+    runCount: selectedCount.value   
+  })
+  // Array.from(selected.value))
 }
+
+defineExpose({
+  reload: loadInitial
+})
 </script>
 
 <style scoped>
