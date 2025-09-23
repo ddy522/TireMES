@@ -12,6 +12,7 @@ export async function fetchWorkOrders(processNameEng = '') {
     }
 
     const response = await axios.get(url)
+    console.log(response.data)
     return response.data
   } catch (error) {
     console.error('작업지시 조회 실패', error)

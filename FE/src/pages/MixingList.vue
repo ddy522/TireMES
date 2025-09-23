@@ -67,8 +67,11 @@ const status = ref('')
 const part = ref('')
 
 // 상세 페이지 이동
-function goDetail(orderId) {
-  router.push(`/mixing/${orderId}`)
+function goDetail(orderId, worksheetSkey) {
+  router.push({
+    path: `/mixing/${orderId}`,
+    state: { worksheetSkey }
+  })
 }
 
 // 페이지 로딩 시 초기 데이터 조회
