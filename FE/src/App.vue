@@ -40,10 +40,10 @@
           검사
         </RouterLink>
 
-        <button class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" disabled>
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/delivery">
           <Truck class="w-5 h-5 mr-2"/>
           출하
-        </button>
+        </RouterLink>
 
         <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/quality">
           <Shield class="w-5 h-5 mr-2" />
@@ -59,6 +59,9 @@
           로트 추적
         </RouterLink>
 
+        <button class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" disabled>
+          보고서 관리
+        </button>
       </nav>
       <div class="p-4 text-xs text-gray-400 border-t">v1.0.0 | 2024.12.16</div>
     </aside>
@@ -72,6 +75,6 @@
 
 <script setup>
 import { 
-  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap 
+  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap, Shield
 } from 'lucide-vue-next'
 </script>

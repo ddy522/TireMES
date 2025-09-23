@@ -12,6 +12,7 @@
                 SELECT part_code AS value,
                        part_name AS label
                 FROM part
+                WHERE part_code LIKE 'TI%'
                 ORDER BY part_code
             </when>
             <when test="type eq 'machine'">

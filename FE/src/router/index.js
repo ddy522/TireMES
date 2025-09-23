@@ -11,6 +11,7 @@ import InspectionDetail from '../pages/InspectionDetail.vue'
 import Materials from '../pages/Materials.vue'
 import LotTracking from '../pages/LotTracking.vue'
 import CuringList from '../pages/CuringList.vue'
+import DeliveryList from '../pages/DeliveryList.vue'
 
 import QualityLayout from '../pages/quality/QualityLayout.vue'
 import QualityOverview from '../pages/quality/QualityOverview.vue'
@@ -19,6 +20,8 @@ import InspectionAdmin from '../pages/quality/InspectionAdmin.vue'
 import DefectAnalysis from '../pages/quality/DefectAnalysis.vue'
 import QualityReports from '../pages/quality/QualityReports.vue'
 import QualityStandards from '../pages/quality/QualityStandards.vue'
+
+
 
 const routes = [
   { path: '/', redirect: '/mixing' },
@@ -32,7 +35,8 @@ const routes = [
   // { path: '/curing/:id', name: 'CuringDetail', component: CuringDetail, props: true },
   { path: '/molding', name: 'MoldingList', component: MoldingList },
   { path: '/inspection', name: 'InspectionList', component: InspectionList },
-  { path: '/inspection/:id', name: 'InspectionDetail', component: InspectionDetail, props: true },
+  { path: '/inspection/run', name: 'InspectionDetail', component: InspectionDetail, props: true },
+  { path: '/delivery', name: 'DeliveryList', component: DeliveryList },
   { path: '/materials', name: 'Materials', component: Materials },
   { path: '/lot-tracking', name: 'LotTracking', component: LotTracking },
     {

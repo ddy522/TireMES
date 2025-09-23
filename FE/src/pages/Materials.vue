@@ -1,6 +1,6 @@
-import InspectionDefect from '../components/materials/ComsumptionAnalysis.vue'
+<!-- import InspectionDefect from '../components/materials/ComsumptionAnalysis.vue'
 import InspectionDefect from '../components/materials/InventoryStatus.vue'
-import InspectionDefect from '../components/materials/MaterialPlanning.vue'
+import InspectionDefect from '../components/materials/MaterialPlanning.vue' -->
 
 <template>
   <div class="space-y-6">

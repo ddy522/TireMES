@@ -2,12 +2,13 @@
   <div class="space-y-4">
     <div class="flex items-center gap-2 text-sm text-gray-500">
       <span>◀</span>
-      <h1 class="text-xl font-bold text-gray-900">믹싱 - 작업지시 조회</h1>
+      <h1 class="text-xl font-bold text-gray-900">출고- 작업지시 조회</h1>
     </div>
 
     <!-- LOT 스캔 안내 -->
-    <!-- <div class="card">
+    <div class="card">
       <h3 class="section-title flex items-center gap-2">
+        <!-- 아이콘 예시 (lucide-react로 교체 가능) -->
         LOT 스캔
       </h3>
       <p class="text-sm text-gray-600 mb-3">
@@ -22,27 +23,7 @@
         >
         <button class="btn-primary" @click="insertLot">등록</button>
       </div>
-    </div> -->
-
-<!--     주석처리
-    검색 영역 (일자 배치) -->
-    <!-- <div class="card">
-      <h3 class="section-title mb-2">검색 조건</h3>
-      <div class="flex flex-wrap items-center gap-2"> -->
-        <!-- 공통 셀렉트 박스 예시 (25.09.18 하도이) -->
-        <!-- <CommonSelect type="part" label="품번" v-model="part" width="200px" />
-        <CommonSelect type="status" label="상태" v-model="status" width="200px" />
-        <input
-          v-model="lotInput"
-          type="text"
-          placeholder="작업지시 번호"
-          class="flex-1 min-w-[200px] border rounded-md px-3 py-2 text-sm"
-        >
-        <button class="btn-primary">조회</button>
-      </div> -->
-    <!-- </div> -->
-
-   
+    </div> 
 
     <!-- 작업지시 테이블 -->
     <WorkOrderTable :orders="workOrders" @start="goDetail" />
@@ -55,8 +36,6 @@ import { useRouter } from 'vue-router'
 import WorkOrderTable from '../components/WorkOrderTable.vue'
 import { fetchWorkOrders } from '../api/workOrderListSearch.js'
 import CommonSelect from '../components/CommonSelect.vue'
-import { insertLotno } from '../api/insertLotno.js'
-
 
 const router = useRouter()
 
@@ -64,14 +43,11 @@ const router = useRouter()
 const lotInput = ref('')
 const workOrders = ref([])
 const status = ref('')
-const part = ref('')
+const priority = ref('')
 
 // 상세 페이지 이동
-function goDetail(orderId, worksheetSkey) {
-  router.push({
-    path: `/mixing/${orderId}`,
-    state: { worksheetSkey }
-  })
+function goDetail(orderId) {
+  router.push(`/curing/${orderId}`)
 }
 
 // 페이지 로딩 시 초기 데이터 조회
@@ -84,26 +60,8 @@ async function searchLot() {
   if (lotInput.value) {
     workOrders.value = await fetchWorkOrders(lotInput.value)
     if (workOrders.value.length > 0) {
-      router.push(`/mixing/${workOrders.value[0].id}`)
+      router.push(`/curing/${workOrders.value[0].id}`)
     }
-  }
-}
-
-// LOT 등록
-async function insertLot() {
-  if (!lotInput.value) {
-    alert("LOT 번호를 입력해주세요.")
-    return
-  }
-  try {
-    const proc = "mixing"
-    const result = await insertLotno(lotInput.value,proc)
-    console.log("✅ 등록 성공:", result)
-    alert("등록되었습니다.")
-    // 등록 후 리스트 갱신
-    workOrders.value = await fetchWorkOrders()
-  } catch (e) {
-    alert("등록 실패")
   }
 }
 </script>

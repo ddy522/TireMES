@@ -20,4 +20,8 @@ public class WorkSheetService {
     public List<WorkSheetModel> getByProcessName(String processNameEng) {
         return workSheetMapper.findByProcessNameEng(processNameEng);
     }
+
+    public List<WorkSheetModel> search(String partCode, String workStatus, String workNo, String processNameEng) {
+        return workSheetMapper.searchWorkSheets(partCode, workStatus, workNo, processNameEng);
+    }
 }
