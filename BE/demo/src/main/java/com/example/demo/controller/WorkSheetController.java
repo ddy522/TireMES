@@ -23,4 +23,14 @@ public class WorkSheetController {
     public List<WorkSheetModel> getByProcess(@PathVariable("processNameEng") String processNameEng) {
         return service.getByProcessName(processNameEng);
     }
+
+    @GetMapping("/search")
+    public List<WorkSheetModel> search(
+            @RequestParam(required = false) String partCode,
+            @RequestParam(required = false) String workStatus,
+            @RequestParam(required = false) String workNo,
+            @RequestParam(required = false) String processNameEng
+    ) {
+        return service.search(partCode, workStatus, workNo, processNameEng);
+    }
 }

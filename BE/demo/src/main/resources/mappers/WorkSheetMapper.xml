@@ -54,6 +54,44 @@
         WHERE pr.process_name_eng = #{processNameEng}
     </select>
 
-
+    <!-- 추가: 선택 조건 검색 -->
+    <select id="searchWorkSheets" resultMap="WorkSheetMap">
+        SELECT
+        w.work_no,
+        /* DATETIME → 문자열 표시가 필요하면 다음 줄 사용, 아니면 w.deadline 그대로 */
+        DATE_FORMAT(w.deadline, '%Y-%m-%d') AS deadline,
+        w.priority,
+        w.part_code,
+        w.process_code,
+        w.qty,
+        w.work_state,
+        p.part_name,
+        pr.process_name_eng
+        FROM worksheet w
+        LEFT JOIN part p
+        ON w.part_code = p.part_code
+        LEFT JOIN `process` pr
+        ON w.process_code = pr.process_no
+        <where>
+            <if test="processNameEng != null and processNameEng != ''">
+                AND pr.process_name_eng = #{processNameEng}
+            </if>
+            <if test="partCode != null and partCode != ''">
+                AND w.part_code = #{partCode}
+            </if>
+            <if test="workStatus != null and workStatus != ''">
+                <!-- work_state 타입(숫자/문자) 불일치 시 아래 한 줄로 교체
+                AND CAST(w.work_state AS CHAR) = #{workStatus} -->
+                AND w.work_state = #{workStatus}
+            </if>
+            <if test="workNo != null and workNo != ''">
+                AND w.work_no LIKE CONCAT('%', #{workNo}, '%')
+            </if>
+        </where>
+        ORDER BY w.deadline ASC, w.work_no DESC
+    </select>
 
 </mapper>
+
+
+<!--        상태 셀렉트 값이 문자이고 컬럼은 숫자면 CAST(w.work_state AS CHAR)-->

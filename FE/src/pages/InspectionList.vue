@@ -21,8 +21,12 @@
         <button class="btn-primary" @click="searchLot">조회</button>
       </div>
     </div>
+        <WorkOrderTable
+          @bulk-start="goInspectMany" 
+    />
 
-    <WorkOrderTable :orders="workOrders" @start="goDetail" />
+    <!-- <WorkOrderTable :orders="workOrders" @start="goDetail" /> -->
+
   </div>
 </template>
 
@@ -34,17 +38,25 @@ import WorkOrderTable from '../components/WorkOrderTable.vue'
 const router = useRouter()
 const lotInput = ref('')
 
-const workOrders = ref([
-  { id: 'WO-2024-001', product: '타이어 A', qty: 100, status: '진행중', priority: '높음', start: '09:00', end: '17:00' },
-  { id: 'WO-2024-002', product: '타이어 B', qty: 150, status: '대기', priority: '보통', start: '10:00', end: '18:00' },
-  { id: 'WO-2024-003', product: '타이어 C', qty: 80,  status: '완료', priority: '낮음', start: '08:00', end: '16:00' },
-])
-
-function goDetail(orderId) {
-  router.push(`/inspection/${orderId}`)
+function goInspectMany(workNos) {
+  // ✅ 선택된 workNos를 가지고 검사 상세 페이지로 이동
+  router.push({
+    name: 'InspectionDetail',
+    query: { workNos: workNos.join(',') }
+  })
 }
 
-function searchLot() {
-  if (lotInput.value) router.push('/inspection/WO-2024-001')
-}
+// const workOrders = ref([
+//   { id: 'WO-2024-001', product: '타이어 A', qty: 100, status: '진행중', priority: '높음', start: '09:00', end: '17:00' },
+//   { id: 'WO-2024-002', product: '타이어 B', qty: 150, status: '대기', priority: '보통', start: '10:00', end: '18:00' },
+//   { id: 'WO-2024-003', product: '타이어 C', qty: 80,  status: '완료', priority: '낮음', start: '08:00', end: '16:00' },
+// ])
+
+// function goDetail(orderId) {
+//   router.push(`/inspection/${orderId}`)
+// }
+
+// function searchLot() {
+//   if (lotInput.value) router.push('/inspection/WO-2024-001')
+// }
 </script>
