@@ -21,10 +21,11 @@ import DefectAnalysis from '../pages/quality/DefectAnalysis.vue'
 import QualityReports from '../pages/quality/QualityReports.vue'
 import QualityStandards from '../pages/quality/QualityStandards.vue'
 
-
+import DashBoard from '../pages/Dashboard.vue'
 
 const routes = [
-  { path: '/', redirect: '/mixing' },
+  { path: '/', redirect: '/dashbord' },
+  { path: '/dashboard', name: 'DashBoard', component: DashBoard },
   { path: '/mixing', name: 'MixingList', component: MixingList },
   { path: '/mixing/:id', name: 'MixingDetail', component: MixingDetail, props: true },
   { path: '/extrusion', name: 'ExtrusionList', component: ExtrusionList },     
