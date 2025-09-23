@@ -45,8 +45,8 @@
       </div>
     </div>
 
-    <!-- 공정 진행 현황 (타임라인/스텝) -->
-    <LotTimeline :steps="steps" />
+    <!-- 주석처리 : 추후 살리고 싶으면 살려도 됨!! 공정 진행 현황 (타임라인/스텝) -->
+    <!-- <LotTimeline :steps="steps" /> -->
 
     <!-- 공정별 이력 LOT 테이블 -->
     <LotHistoryTable :rows="historyRows" class="mt-2" />

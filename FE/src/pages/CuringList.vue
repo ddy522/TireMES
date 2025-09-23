@@ -27,14 +27,14 @@
 
     <!-- 공통 셀렉트 박스 예시 (나중에 사용 가능) -->
     
-    <CommonSelect
+    <!-- <CommonSelect
       type="part"
       label="품번"
       v-model="status"
       width = "200px"
-    />
-
-    <button class="btn-primary" @click="searchLot">조회</button>
+    /> -->
+<!-- 
+    <button class="btn-primary" @click="searchLot">조회</button> -->
    
 
     <!-- 작업지시 테이블 -->

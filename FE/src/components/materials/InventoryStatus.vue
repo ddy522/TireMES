@@ -3,7 +3,13 @@
   <div class="space-y-4">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <KpiCard title="총 자재 가치" value="₩1.8B" sub="전월 +3.2%" tone="neutral" />
-      <KpiCard title="부족 자재" value="3" sub="긴급 보충 필요" tone="bad" />
+    <!-- 부족 자재: 동적 값/톤/서브텍스트 -->
+      <KpiCard
+        title="부족 자재"
+        :value="shortageCount"
+        :sub="shortageSub"
+        :tone="shortageTone"
+      />
       <KpiCard title="자재 회전율" value="5.2" sub="전월 +0.4" tone="good" />
       <KpiCard title="재고 정확도" value="99.1%" sub="전월 +0.2%" tone="good" />
     </div>
@@ -116,9 +122,12 @@
   </div>
 </template>
 
+
+
+
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-// ✅ API 함수명 통일: inventoryListSearch.js에서 이렇게 export 하세요: export async function fetchInventoryAll() { ... }
 import { fetchInventoryAll } from '../../api/inventoryListSearch.js'
 import { fetchLotsByPartCode } from '../../api/inventoryLots.js'
 import KpiCard from './KpiCard.vue'
@@ -151,6 +160,16 @@ const filteredRows = computed(() => {
     String(r.partCode ?? '').toLowerCase().includes(q)
   )
 })
+// 부족 개수 집계 (KPI 카드)
+const shortageCount = computed(() =>
+  filteredRows.value.filter(r => (r.stockStatus ?? r.stockstatus) === '부족').length
+)
+
+// 표시용 텍스트/톤
+const shortageTone = computed(() => (shortageCount.value > 0 ? 'bad' : 'good'))
+const shortageSub  = computed(() =>
+  shortageCount.value > 0 ? '긴급 보충 필요' : '모두 안전재고 이상'
+)
 
 function badge(status) {
   // 백엔드 CASE 결과 예: '부족' | '여유' | 기타

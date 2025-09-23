@@ -21,7 +21,7 @@ import { onMounted, ref } from 'vue'
 const barRef = ref(null)
 
 onMounted(async () => {
-  // ✅ 여기서 동적으로 불러오면 setup은 동기 유지
+  // 여기서 동적으로 불러오면 setup은 동기 유지
   const echarts = (await import('echarts')).default || (await import('echarts'))
   if (!barRef.value) return
   const chart = echarts.init(barRef.value)
