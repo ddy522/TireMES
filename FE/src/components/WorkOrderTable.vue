@@ -78,9 +78,8 @@
               </span>
             </td>
             <td class="px-3 py-2 text-center">{{ order.deadline }}</td>
-
             <td v-if="!isInspection" class="px-3 py-2 text-center">
-              <button class="btn-primary" @click="$emit('start', order.workNo)">작업시작</button>
+               <button class="btn-primary" @click="$emit('start', order.workNo, order.worksheetSkey)">작업시작</button>
             </td>
           </tr>
           <tr v-if="!loading && orders.length === 0">

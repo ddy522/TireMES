@@ -26,7 +26,7 @@ import QualityStandards from '../pages/quality/QualityStandards.vue'
 const routes = [
   { path: '/', redirect: '/mixing' },
   { path: '/mixing', name: 'MixingList', component: MixingList },
-  { path: '/mixing/:id', name: 'MixingDetail', component: MixingDetail, props: true },
+  { path: '/mixing/:id', name: 'MixingDetail', component: MixingDetail, props: true, meta: { process: 'mixing' } },
   { path: '/extrusion', name: 'ExtrusionList', component: ExtrusionList },     
   { path: '/extrusion/:id', name: 'ExtrusionDetail', component: ExtrusionDetail, props: true }, 
   { path: '/cutting', name: 'CuttingList', component: CuttingList },

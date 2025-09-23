@@ -35,4 +35,24 @@ public class InsertLotController {
         return result;
 
     }
+
+    @PostMapping("/insertProduction")
+    public Map<String,Object> insertProduction(@RequestBody Map<String, Object> param){
+        Map<String, Object> result = new HashMap<>();
+
+        int doneQty = (int) param.get("doneQty");
+        String remark = (String) param.get("remark");
+        String worksheetSkey = (String) param.get("worksheetSkey");
+
+        try {
+            insertLotService.insertProduction(doneQty, worksheetSkey, remark);
+            result.put("success", true);
+            result.put("message", "생산 LOT 등록 성공!");
+        } catch(RuntimeException e){
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+
+        return result;
+    }
 }
