@@ -70,31 +70,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
+  import axios from 'axios'
 
-const props = defineProps({ lots: { type: Array, default: () => [] } })
+  const lots = ref([])         // LOT 데이터 저장
+  const showModal = ref(false) // 모달 상태
+  const selectedLot = ref({})  // 선택된 LOT
 
-const showModal = ref(false)
-const selectedLot = ref({})
+  // API 호출해서 LOT 목록 가져오기
+  async function fetchLots() {
+    try {
+      const res = await axios.get('http://localhost:8080/api/lots') // Spring API
+      lots.value = res.data
+    } catch (e) {
+      console.error('LOT 불러오기 실패:', e)
+    }
+  }
 
-function badgeClass(status) {
-  if (status === '완료') return 'badge-green'
-  if (status === '진행중') return 'badge-blue'
-  if (status === '대기') return 'badge-gray'
-  return 'badge-gray'
-}
+  onMounted(() => {
+    fetchLots()
+  })
 
-function openModal(lot) {
-  selectedLot.value = lot
-  showModal.value = true
-}
+  // 상태별 뱃지 스타일
+  function badgeClass(status) {
+    if (status === '완료') return 'badge-green'
+    if (status === '진행중') return 'badge-blue'
+    if (status === '대기') return 'badge-gray'
+    return 'badge-gray'
+  }
 
-function closeModal() {
-  showModal.value = false
-}
+  // 모달 열기
+  function openModal(lot) {
+    selectedLot.value = lot
+    showModal.value = true
+  }
 
-function deleteLot(no) {
-  const idx = props.lots.findIndex(l => l.no === no)
-  if (idx !== -1) props.lots.splice(idx, 1)
-}
+  // 모달 닫기
+  function closeModal() {
+    showModal.value = false
+  }
+
+  // LOT 삭제 (프론트에서만 삭제됨)
+  function deleteLot(no) {
+    const idx = lots.value.findIndex(l => l.no === no)
+    if (idx !== -1) lots.value.splice(idx, 1)
+  }
 </script>

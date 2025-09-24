@@ -18,8 +18,11 @@ export async function fetchWorkOrders(processNameEng = '') {
     } else {
       url = `${API_BASE}/all`                // 전체 조회
     }
-    const { data } = await axios.get(url)
-    return data
+
+    const response = await axios.get(url)
+    console.log(response.data)
+    return response.data
+
   } catch (error) {
     console.error('작업지시 조회 실패', error)
     return []
