@@ -7,7 +7,7 @@
           id="lot-input"
           v-model="lotNo"
           type="text"
-          placeholder="원자재 LOT 번호를 스캔하세요 (예: MAT-003-LOT-001)"
+          :placeholder="placeholder"
           class="w-full border rounded-md px-3 py-2 pr-10 text-sm"
           @keyup.enter="emitAdd"
         />
@@ -31,7 +31,7 @@
           </svg>
         </button>
       </div>
-      <button class="btn-primary" @click="emitAdd">투입</button>
+      <button class="btn-primary" @click="emitAdd">{{ buttonText }}</button>
     </div>
     
     <!-- QR 스캐너 모달 -->
@@ -70,6 +70,18 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+
+// Props 정의
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: '원자재 LOT 번호를 스캔하세요 (예: MAT-003-LOT-001)'
+  },
+  buttonText: {
+    type: String,
+    default: '투입'
+  }
+})
 
 const lotNo = ref('')
 const emit = defineEmits(['add'])
@@ -164,7 +176,7 @@ function scanQRCode() {
       lotNo.value = code.data
       stopScanning()
       
-      // 자동으로 투입하고 싶다면 주석 해제
+      // 자동으로 추가하고 싶다면 주석 해제
       // emitAdd()
     }
   }

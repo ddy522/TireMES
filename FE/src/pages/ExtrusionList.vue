@@ -23,11 +23,13 @@
       <p class="text-sm text-gray-600 mb-3">
         LOT를 스캔하면 작업지시가 등록됩니다.
       </p>
-      <div class="flex gap-2">
-        <input v-model="lotInput" type="text" placeholder="LOT 번호를 입력/스캔하세요 (예: LOT-W0001-001)"
-               class="flex-1 border rounded-md px-3 py-2 text-sm">
-        <button class="btn-primary" @click="insertLot">등록</button>
-      </div>
+      
+      <!-- LotScanInput 컴포넌트로 교체 -->
+      <LotScanInput 
+        @add="insertLot" 
+        placeholder="LOT 번호를 입력/스캔하세요 (예: LOT-W0001-001)"
+        buttonText="등록"
+      />
     </div>
 
     <WorkOrderTable :orders="workOrders" @start="goDetail" />
@@ -38,13 +40,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import WorkOrderTable from '../components/WorkOrderTable.vue'
+import LotScanInput from '../components/LotScanInput.vue'
 import { fetchWorkOrders } from '../api/workOrderListSearch.js'
 import { insertLotno } from '../api/insertLotno.js'
 
 const router = useRouter()
-const lotInput = ref('')
 const workOrders = ref([])
-
 
 // 상세페이지 이동
 function goDetail(orderId) {
@@ -56,19 +57,16 @@ onMounted(async () => {
   workOrders.value = await fetchWorkOrders()
 })
 
-function searchLot() {
-  if (lotInput.value) router.push('/extrusion/WO-2024-001')
-}
-
-// LOT 등록
-async function insertLot() {
-  if (!lotInput.value) {
+// LOT 등록 - LotScanInput 컴포넌트에서 emit된 이벤트 처리
+async function insertLot(lotNumber) {
+  if (!lotNumber) {
     alert("LOT 번호를 입력해주세요.")
     return
   }
+  
   try {
     const proc = "extrusion"
-    const result = await insertLotno(lotInput.value, proc)  // 서버 호출
+    const result = await insertLotno(lotNumber, proc)  // 서버 호출
     console.log("✅ 등록 결과:", result)
 
     if (result.success) {

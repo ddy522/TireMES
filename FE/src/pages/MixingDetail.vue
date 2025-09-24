@@ -53,7 +53,11 @@
           </div>
 
           <div v-if="activeTab==='bom'">
-            <LotScanInput @add="onAddLot" />
+            <LotScanInput 
+              @add="onAddLot" 
+              placeholder="원자재 LOT 번호를 스캔하세요 (예: MAT-003-LOT-001)"
+              buttonText="투입"
+            />
             <!-- API에서 가져온 BOM 데이터 표시 -->
             <div v-if="loading" class="text-center text-gray-500 py-4">BOM 정보를 불러오는 중...</div>
             <div v-else-if="error" class="text-center text-red-500 py-4">{{ error }}</div>
