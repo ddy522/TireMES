@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.MaterialPlanMapper">
+
+    <select id="selectMaterialPlan" resultType="com.example.demo.model.MaterialPlanModel">
+        <![CDATA[
+      SELECT
+          bd.child_part_code AS partCode,
+          p.part_name        AS partName,
+          COALESCE(inv.curr_inventory, 0)            AS currInventory,
+          SUM(w.qty * bd.useage)                     AS expectedConsumption,
+          GREATEST(SUM(w.qty * bd.useage) - COALESCE(inv.curr_inventory, 0), 0) AS shortageQty,
+          CASE
+            WHEN COALESCE(inv.curr_inventory, 0) < p.safe_qty THEN '부족'
+            ELSE '여유'
+          END AS stockStatus,
+          CASE
+            WHEN SUM(w.qty * bd.useage) > COALESCE(inv.curr_inventory, 0) THEN '발주 필요'
+            ELSE '불필요'
+          END AS orderRecommendation
+      FROM worksheet w
+      JOIN (
+          SELECT work_no, MAX(work_state) AS max_state
+          FROM worksheet
+          GROUP BY work_no
+      ) mw
+        ON w.work_no = mw.work_no
+       AND w.work_state = mw.max_state
+      JOIN bom_d bd
+        ON bd.part_code = w.part_code
+      JOIN part p
+        ON bd.child_part_code = p.part_code
+      LEFT JOIN (
+          SELECT l.part_code, COALESCE(SUM(l.qty), 0) AS curr_inventory
+          FROM lot l
+          GROUP BY l.part_code
+      ) inv
+        ON p.part_code = inv.part_code
+    ]]>
+        <where>
+            <if test="productCode != null and productCode != ''">
+                <![CDATA[ AND w.part_code = #{productCode} ]]>
+            </if>
+            <if test="fromDate != null and fromDate != ''">
+                <![CDATA[ AND w.deadline >= CONCAT(#{fromDate}, ' 00:00:00') ]]>
+            </if>
+            <if test="toDate != null and toDate != ''">
+                <![CDATA[ AND w.deadline <  DATE_ADD(CONCAT(#{toDate}, ' 00:00:00'), INTERVAL 1 DAY) ]]>
+            </if>
+        </where>
+        <![CDATA[
+      GROUP BY
+          bd.child_part_code, p.part_name, inv.curr_inventory, p.safe_qty
+      ORDER BY p.part_name
+    ]]>
+    </select>
+
+</mapper>
+
+
+        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<!DOCTYPE mapper-->
+<!--        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"-->
+<!--        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
+
+<!--<mapper namespace="com.example.demo.mapper.MaterialPlanMapper">-->
+
+<!--    &lt;!&ndash; 자재 계획 집계 &ndash;&gt;-->
+<!--    <select id="selectMaterialPlan" resultType="com.example.demo.model.MaterialPlanModel">-->
+<!--        <![CDATA[-->
+<!--    SELECT-->
+<!--        bd.child_part_code AS partCode,-->
+<!--        p.part_name        AS partName,-->
+<!--        COALESCE(inv.curr_inventory, 0)            AS currInventory,-->
+<!--        SUM(w.qty * bd.useage)                     AS expectedConsumption,-->
+<!--        GREATEST(SUM(w.qty * bd.useage) - COALESCE(inv.curr_inventory, 0), 0) AS shortageQty,-->
+<!--        CASE-->
+<!--          WHEN COALESCE(inv.curr_inventory, 0) < p.safe_qty THEN '부족'-->
+<!--          ELSE '여유'-->
+<!--        END AS stockStatus,-->
+<!--        CASE-->
+<!--          WHEN SUM(w.qty * bd.useage) > COALESCE(inv.curr_inventory, 0) THEN '발주 필요'-->
+<!--          ELSE '불필요'-->
+<!--        END AS orderRecommendation-->
+<!--    FROM worksheet w-->
+<!--    JOIN (-->
+<!--        SELECT work_no, MAX(work_state) AS max_state-->
+<!--        FROM worksheet-->
+<!--        GROUP BY work_no-->
+<!--    ) mw-->
+<!--      ON w.work_no = mw.work_no-->
+<!--     AND w.work_state = mw.max_state-->
+<!--    JOIN bom_d bd-->
+<!--      ON bd.part_code = w.part_code-->
+<!--    JOIN part p-->
+<!--      ON bd.child_part_code = p.part_code-->
+<!--    LEFT JOIN (-->
+<!--        SELECT l.part_code, COALESCE(SUM(l.qty), 0) AS curr_inventory-->
+<!--        FROM lot l-->
+<!--        GROUP BY l.part_code-->
+<!--    ) inv-->
+<!--      ON p.part_code = inv.part_code-->
+<!--    ]]>-->
+<!--        <where>-->
+<!--            <if test="productCode != null and productCode != ''">-->
+<!--                <![CDATA[ AND w.part_code = #{productCode} ]]>-->
+<!--            </if>-->
+<!--            <if test="fromDate != null and fromDate != ''">-->
+<!--                <![CDATA[ AND w.deadline >= CONCAT(#{fromDate}, ' 00:00:00') ]]>-->
+<!--            </if>-->
+<!--            <if test="toDate != null and toDate != ''">-->
+<!--                <![CDATA[ AND w.deadline <  CONCAT(#{toDate},  ' 23:59:59') ]]>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        <![CDATA[-->
+<!--    GROUP BY-->
+<!--        bd.child_part_code, p.part_name, inv.curr_inventory, p.safe_qty-->
+<!--    ORDER BY p.part_name-->
+<!--    ]]>-->
+<!--    </select>-->
+
+<!--</mapper>-->

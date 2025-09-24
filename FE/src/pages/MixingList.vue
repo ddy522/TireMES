@@ -6,9 +6,8 @@
     </div>
 
     <!-- LOT 스캔 안내 -->
-    <div class="card">
+    <!-- <div class="card">
       <h3 class="section-title flex items-center gap-2">
-        <!-- 아이콘 예시 (lucide-react로 교체 가능) -->
         LOT 스캔
       </h3>
       <p class="text-sm text-gray-600 mb-3">
@@ -23,15 +22,15 @@
         >
         <button class="btn-primary" @click="insertLot">등록</button>
       </div>
-    </div>
+    </div> -->
 
-    
-    <!-- 검색 영역 (일자 배치) -->
-    <div class="card">
+<!--     주석처리
+    검색 영역 (일자 배치) -->
+    <!-- <div class="card">
       <h3 class="section-title mb-2">검색 조건</h3>
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2"> -->
         <!-- 공통 셀렉트 박스 예시 (25.09.18 하도이) -->
-        <CommonSelect type="part" label="품번" v-model="part" width="200px" />
+        <!-- <CommonSelect type="part" label="품번" v-model="part" width="200px" />
         <CommonSelect type="status" label="상태" v-model="status" width="200px" />
         <input
           v-model="lotInput"
@@ -40,8 +39,8 @@
           class="flex-1 min-w-[200px] border rounded-md px-3 py-2 text-sm"
         >
         <button class="btn-primary">조회</button>
-      </div>
-    </div>
+      </div> -->
+    <!-- </div> -->
 
    
 

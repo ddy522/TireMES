@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.InventoryMapper">
+
+    <!-- 컬럼 ↔ 필드 매핑 -->
+    <resultMap id="InventoryMap" type="com.example.demo.model.InventoryModel">
+        <result column="part_code"      property="partCode"/>
+        <result column="part_name"      property="partName"/>
+        <result column="std"            property="std"/>
+        <result column="company"        property="company"/>
+        <result column="safe_qty"       property="safeQty"/>
+        <result column="curr_inventory" property="currInventory"/>
+        <result column="stock_status"   property="stockStatus"/>
+        <!-- unit을 쓰실 거면 모델에 필드 추가 + 매핑 -->
+        <result column="unit"           property="unit"/>
+    </resultMap>
+
+
+    <select id="findAllInventory" resultMap="InventoryMap">
+        <![CDATA[
+  SELECT
+      pu.part_code,
+      pu.part_name,
+      pu.std,
+      pu.company,
+      pu.safe_qty,
+      COALESCE(SUM(l.qty), 0) AS curr_inventory,
+      CASE
+        WHEN COALESCE(SUM(l.qty), 0) < pu.safe_qty THEN '부족'
+        ELSE '여유'
+      END AS stock_status,
+      pu.unit
+  FROM (
+      SELECT
+          p.part_code,
+          p.part_name,
+          p.std,
+          p.company,
+          p.safe_qty,
+          p.gubun,
+          cd.code_name AS unit
+      FROM part p
+      LEFT JOIN (
+          SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,
+                 c.code_name
+          FROM commoncode c
+          WHERE c.group_code = 'UN'
+      ) cd ON cd.unique_cd = p.unit
+  ) pu
+  LEFT JOIN lot l
+    ON pu.part_code = l.part_code
+  WHERE pu.gubun = 'PG2'
+  GROUP BY
+      pu.part_code, pu.part_name, pu.std, pu.company, pu.safe_qty, pu.unit
+  ORDER BY pu.part_code
+  ]]>
+    </select>
+
+
+    <select id="findByPartCode" parameterType="string" resultMap="InventoryMap">
+        <![CDATA[
+  SELECT
+      pu.part_code,
+      pu.part_name,
+      pu.std,
+      pu.company,
+      pu.safe_qty,
+      COALESCE(SUM(l.qty), 0) AS curr_inventory,
+      CASE
+        WHEN COALESCE(SUM(l.qty), 0) < pu.safe_qty THEN '부족'
+        ELSE '여유'
+      END AS stock_status,
+      pu.unit
+  FROM (
+      SELECT
+          p.part_code,
+          p.part_name,
+          p.std,
+          p.company,
+          p.safe_qty,
+          p.gubun,
+          cd.code_name AS unit
+      FROM part p
+      LEFT JOIN (
+          SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,
+                 c.code_name
+          FROM commoncode c
+          WHERE c.group_code = 'UN'
+      ) cd ON cd.unique_cd = p.unit
+  ) pu
+  LEFT JOIN lot l
+    ON pu.part_code = l.part_code
+  WHERE pu.gubun = 'PG2'
+    AND pu.part_code = #{partCode}
+  GROUP BY
+      pu.part_code, pu.part_name, pu.std, pu.company, pu.safe_qty, pu.unit
+  ORDER BY pu.part_code
+  ]]>
+    </select>
+
+
+    <select id="findByPartCodeLike" parameterType="string" resultMap="InventoryMap">
+        <![CDATA[
+  SELECT
+      pu.part_code,
+      pu.part_name,
+      pu.std,
+      pu.company,
+      pu.safe_qty,
+      COALESCE(SUM(l.qty), 0) AS curr_inventory,
+      CASE
+        WHEN COALESCE(SUM(l.qty), 0) < pu.safe_qty THEN '부족'
+        ELSE '여유'
+      END AS stock_status,
+      pu.unit
+  FROM (
+      SELECT
+          p.part_code,
+          p.part_name,
+          p.std,
+          p.company,
+          p.safe_qty,
+          p.gubun,
+          cd.code_name AS unit
+      FROM part p
+      LEFT JOIN (
+          SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,
+                 c.code_name
+          FROM commoncode c
+          WHERE c.group_code = 'UN'
+      ) cd ON cd.unique_cd = p.unit
+  ) pu
+  LEFT JOIN lot l
+    ON pu.part_code = l.part_code
+  WHERE pu.gubun = 'PG2'
+    AND pu.part_code LIKE CONCAT('%', #{partCode}, '%')
+  GROUP BY
+      pu.part_code, pu.part_name, pu.std, pu.company, pu.safe_qty, pu.unit
+  ORDER BY pu.part_code
+  ]]>
+    </select>
+
+    <!--    &lt;!&ndash; 전체 재고 조회 &ndash;&gt;-->
+<!--    <select id="findAllInventory" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--      SELECT-->
+<!--        p.part_code,-->
+<!--        p.part_name,-->
+<!--        p.std,-->
+<!--        p.company,-->
+<!--        p.safe_qty,-->
+<!--        COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--        CASE-->
+<!--          WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--          ELSE '여유'-->
+<!--        END AS stock_status,-->
+<!--        cd.code_name AS unit-->
+<!--      FROM part p-->
+<!--      LEFT JOIN lot l-->
+<!--        ON p.part_code = l.part_code-->
+<!--      LEFT JOIN (-->
+<!--        SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,-->
+<!--               c.code_name-->
+<!--        FROM groupcode g-->
+<!--        INNER JOIN commoncode c-->
+<!--          ON g.group_code = c.group_code AND c.group_code = 'UN'-->
+<!--      ) cd ON cd.unique_cd = p.unit-->
+<!--      WHERE p.gubun = 'PG2'-->
+<!--      GROUP BY-->
+<!--        p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--      ORDER BY p.part_code-->
+<!--    ]]>-->
+<!--    </select>-->
+
+<!--    <select id="findByPartCode" parameterType="string" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--      SELECT-->
+<!--        p.part_code,-->
+<!--        p.part_name,-->
+<!--        p.std,-->
+<!--        p.company,-->
+<!--        p.safe_qty,-->
+<!--        COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--        CASE-->
+<!--          WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--          ELSE '여유'-->
+<!--        END AS stock_status,-->
+<!--        cd.code_name AS unit-->
+<!--      FROM part p-->
+<!--      LEFT JOIN lot l-->
+<!--        ON p.part_code = l.part_code-->
+<!--      LEFT JOIN (-->
+<!--        SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,-->
+<!--               c.code_name-->
+<!--        FROM groupcode g-->
+<!--        INNER JOIN commoncode c-->
+<!--          ON g.group_code = c.group_code AND c.group_code = 'UN'-->
+<!--      ) cd ON cd.unique_cd = p.unit-->
+<!--      WHERE p.gubun = 'PG2'-->
+<!--        AND p.part_code = #{partCode}-->
+<!--      GROUP BY-->
+<!--        p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--      ORDER BY p.part_code-->
+<!--    ]]>-->
+<!--    </select>-->
+
+<!--    <select id="findByPartCodeLike" parameterType="string" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--      SELECT-->
+<!--        p.part_code,-->
+<!--        p.part_name,-->
+<!--        p.std,-->
+<!--        p.company,-->
+<!--        p.safe_qty,-->
+<!--        COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--        CASE-->
+<!--          WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--          ELSE '여유'-->
+<!--        END AS stock_status,-->
+<!--        cd.code_name AS unit-->
+<!--      FROM part p-->
+<!--      LEFT JOIN lot l-->
+<!--        ON p.part_code = l.part_code-->
+<!--      LEFT JOIN (-->
+<!--        SELECT CONCAT(c.group_code, c.code_no) AS unique_cd,-->
+<!--               c.code_name-->
+<!--        FROM groupcode g-->
+<!--        INNER JOIN commoncode c-->
+<!--          ON g.group_code = c.group_code AND c.group_code = 'UN'-->
+<!--      ) cd ON cd.unique_cd = p.unit-->
+<!--      WHERE p.gubun = 'PG2'-->
+<!--        AND p.part_code LIKE CONCAT('%', #{partCode}, '%')-->
+<!--      GROUP BY-->
+<!--        p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--      ORDER BY p.part_code-->
+<!--    ]]>-->
+<!--    </select>-->
+
+</mapper>
+
+
+
+        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<!DOCTYPE mapper-->
+<!--        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"-->
+<!--        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
+
+<!--<mapper namespace="com.example.demo.mapper.InventoryMapper">-->
+
+<!--    &lt;!&ndash; 컬럼 ↔ 필드 매핑 &ndash;&gt;-->
+<!--    <resultMap id="InventoryMap" type="com.example.demo.model.InventoryModel">-->
+<!--        <result column="part_code"      property="partCode"/>-->
+<!--        <result column="part_name"      property="partName"/>-->
+<!--        <result column="std"            property="std"/>-->
+<!--        <result column="company"        property="company"/>-->
+<!--        <result column="safe_qty"       property="safeQty"/>-->
+<!--        <result column="curr_inventory" property="currInventory"/>-->
+<!--        <result column="stock_status"   property="stockStatus"/>-->
+<!--    </resultMap>-->
+
+<!--    &lt;!&ndash; 전체 재고 조회 &ndash;&gt;-->
+<!--    <select id="findAllInventory" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--            SELECT-->
+<!--      p.part_code,-->
+<!--      p.part_name,-->
+<!--      p.std,-->
+<!--      p.company,-->
+<!--      p.safe_qty,-->
+<!--      COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--      CASE-->
+<!--        WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--        ELSE '여유'-->
+<!--      END AS stock_status,-->
+<!--      cd.code_name  as unit-->
+<!--    FROM part p-->
+<!--    LEFT JOIN lot l-->
+<!--      ON p.part_code = l.part_code-->
+<!--    LEFT JOIN (-->
+<!--        SELECT concat(c.group_code, c.code_no) unique_cd,-->
+<!--               c.code_name-->
+<!--	    FROM groupcode g-->
+<!--	    INNER JOIN commoncode c ON g.group_code = c.group_code AND c.group_code ='UN'-->
+<!--    )cd ON cd.unique_cd = p.unit-->
+<!--    WHERE p.gubun = 'PG2'-->
+<!--    GROUP BY-->
+<!--      p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--    ORDER BY p.part_code;-->
+<!--  ]]>-->
+<!--    </select>-->
+
+
+
+<!--    <select id="findByPartCode" parameterType="string" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--    SELECT-->
+<!--      p.part_code,-->
+<!--      p.part_name,-->
+<!--      p.std,-->
+<!--      p.company,-->
+<!--      p.safe_qty,-->
+<!--      COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--      CASE-->
+<!--        WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--        ELSE '여유'-->
+<!--      END AS stock_status,-->
+<!--      cd.code_name  as unit-->
+<!--    FROM part p-->
+<!--    LEFT JOIN lot l-->
+<!--      ON p.part_code = l.part_code-->
+<!--    LEFT JOIN (-->
+<!--        SELECT concat(c.group_code, c.code_no) unique_cd,-->
+<!--               c.code_name-->
+<!--	    FROM groupcode g-->
+<!--	    INNER JOIN commoncode c ON g.group_code = c.group_code AND c.group_code ='UN'-->
+
+<!--    )cd ON cd.unique_cd = p.unit-->
+<!--    WHERE p.gubun = 'PG2'-->
+<!--      AND p.part_code = #{partCode}-->
+<!--    GROUP BY-->
+<!--      p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--    ORDER BY p.part_code;-->
+<!--    ]]>-->
+<!--    </select>-->
+
+
+<!--    <select id="findByPartCodeLike" parameterType="string" resultMap="InventoryMap">-->
+<!--        <![CDATA[-->
+<!--            SELECT-->
+<!--      p.part_code,-->
+<!--      p.part_name,-->
+<!--      p.std,-->
+<!--      p.company,-->
+<!--      p.safe_qty,-->
+<!--      COALESCE(SUM(l.qty), 0) AS curr_inventory,-->
+<!--      CASE-->
+<!--        WHEN COALESCE(SUM(l.qty), 0) < p.safe_qty THEN '부족'-->
+<!--        ELSE '여유'-->
+<!--      END AS stock_status,-->
+<!--      cd.code_name  as unit-->
+<!--    FROM part p-->
+<!--    LEFT JOIN lot l-->
+<!--      ON p.part_code = l.part_code-->
+<!--    LEFT JOIN (-->
+<!--        SELECT concat(c.group_code, c.code_no) unique_cd,-->
+<!--               c.code_name-->
+<!--	    FROM groupcode g-->
+<!--	    INNER JOIN commoncode c ON g.group_code = c.group_code AND c.group_code ='UN'-->
+
+<!--    )cd ON cd.unique_cd = p.unit-->
+<!--    WHERE p.gubun = 'PG2'-->
+<!--      AND p.part_code LIKE CONCAT('%', #{partCode}, '%')-->
+<!--    GROUP BY-->
+<!--      p.part_code, p.part_name, p.std, p.company, p.safe_qty-->
+<!--    ORDER BY p.part_code;-->
+
+<!--    </select>-->
+
+<!--</mapper>-->

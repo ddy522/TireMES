@@ -1,6 +1,6 @@
-import InspectionDefect from '../components/materials/ComsumptionAnalysis.vue'
+<!-- import InspectionDefect from '../components/materials/ComsumptionAnalysis.vue'
 import InspectionDefect from '../components/materials/InventoryStatus.vue'
-import InspectionDefect from '../components/materials/MaterialPlanning.vue'
+import InspectionDefect from '../components/materials/MaterialPlanning.vue' -->
 
 <template>
   <div class="space-y-6">
@@ -34,6 +34,7 @@ import { ref } from 'vue'
 import InventoryStatus from '../components/materials/InventoryStatus.vue'
 import ConsumptionAnalysis from '../components/materials/ConsumptionAnalysis.vue'
 import MaterialPlanning from '../components/materials/MaterialPlanning.vue'
+import KpiCard from '../components/materials/KpiCard.vue'
 
 const tabs = [
   { key: 'stock', label: '재고 현황' },
@@ -42,3 +43,4 @@ const tabs = [
 ]
 const tab = ref('stock')
 </script>
+
