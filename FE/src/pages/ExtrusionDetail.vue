@@ -51,17 +51,30 @@
               placeholder="완료된 수량 입력"
               class="border rounded-md px-3 py-2 text-sm w-20"
             />
-            <!-- <select v-model="quality" class="border rounded-md px-3 py-2 text-sm w-24">
-              <option value="합격">합격</option>
-              <option value="불합격">불합격</option>
-            </select> -->
             <input
               v-model="remark"
               type="text"
               placeholder="특이사항이나 비고를 입력하세요"
               class="border rounded-md px-3 py-2 text-sm flex-1"
             />
-            <button class="btn-primary px-4 py-2 whitespace-nowrap">발행</button>
+            
+            <!-- ✅ 수정: 기존 단순 버튼을 상태 관리 버튼으로 변경 -->
+            <button 
+              @click="handleProductionComplete"
+              :disabled="productionLoading || !doneQty"
+              :class="['px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors', 
+                      productionLoading || !doneQty 
+                        ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' 
+                        : 'btn-primary hover:bg-blue-600 active:bg-blue-700']"
+            >
+              {{ productionLoading ? '처리중...' : '발행' }}
+            </button>
+          </div>
+
+          <!-- ✅ 추가: 생산완료 처리 결과 메시지 표시 영역 -->
+          <div v-if="productionMessage" class="mt-2 p-2 text-sm rounded" 
+              :class="productionError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-600 border border-green-200'">
+            {{ productionMessage }}
           </div>
         </div>
 
@@ -88,9 +101,19 @@ import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import LotCreateForm from '../components/LotCreateForm.vue'
 import LotList from '../components/LotList.vue'
+// ✅ 추가: QR 생성을 위한 useProduction composable 임포트
+import { useProduction } from '../composables/useProduction'
 
 const route = useRoute()
 const id = route.params.id
+
+// ✅ 추가: 생산완료 처리 관련 상태 관리
+const { 
+  loading: productionLoading, 
+  error: productionError, 
+  completeProductionWithQR 
+} = useProduction()
+const productionMessage = ref('')
 
 // 생산완료처리
 const doneQty = ref(0)
@@ -115,5 +138,52 @@ function createLot(qty) {
     quality: '대기',
     history: ['믹싱']
   })
+}
+
+// ✅ 추가: 생산완료 처리 및 QR 생성 함수 (완전히 새로운 함수)
+async function handleProductionComplete() {
+  if (!doneQty.value) {
+    productionMessage.value = '완료 수량을 입력해주세요.'
+    return
+  }
+
+  try {
+    productionMessage.value = ''
+    
+    // 압출 공정용 생산완료 데이터
+    const productionData = {
+      workNo: id, // 작업지시번호
+      doneQty: doneQty.value,
+      remark: remark.value || '',
+      processType: 'EXTRUSION', // 압출 공정 타입 추가
+    }
+
+    const qrOptions = {
+      width: 300,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    }
+
+    const result = await completeProductionWithQR(productionData, qrOptions)
+    
+    if (result.success) {
+      productionMessage.value = `LOT ${result.lotNumber} 생성 완료! QR 코드가 다운로드되었습니다.`
+      
+      // 폼 초기화
+      doneQty.value = 0
+      remark.value = ''
+      
+      // 성공 메시지를 5초 후 자동으로 숨김
+      setTimeout(() => {
+        productionMessage.value = ''
+      }, 5000)
+    }
+  } catch (error) {
+    productionMessage.value = error.message || '생산완료 처리에 실패했습니다.'
+    console.error('생산완료 처리 오류:', error)
+  }
 }
 </script>

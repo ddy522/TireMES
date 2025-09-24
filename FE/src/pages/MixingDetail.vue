@@ -109,10 +109,10 @@
             <button 
               @click="handleProductionComplete"
               :disabled="productionLoading || !doneQty"
-              :class="['px-4 py-2 whitespace-nowrap', 
+              :class="['px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors', 
                       productionLoading || !doneQty 
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                        : 'btn-primary']"
+                        ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' 
+                        : 'btn-primary hover:bg-blue-600 active:bg-blue-700']"
             >
               {{ productionLoading ? '처리중...' : '발행' }}
             </button>
