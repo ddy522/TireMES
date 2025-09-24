@@ -15,59 +15,82 @@
         <!-- 작업지시 정보 -->
         <div class="card">
           <h3 class="section-title">작업지시 정보</h3>
-          <div class="flex items-center gap-4">
+          <div v-if="loading && !worksheetInfo" class="text-center text-gray-500 py-4">
+            작업지시 정보를 불러오는 중...
+          </div>
+          <div v-else-if="error && !worksheetInfo" class="text-center text-red-500 py-4">{{ error }}</div>
+          <div v-else-if="worksheetInfo" class="flex items-center gap-4">
             <div class="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center">
               <span class="text-3xl">🛞</span>
             </div>
             <div class="text-sm">
               <div class="text-gray-500">작업지시번호</div>
-              <div class="font-semibold text-gray-900">{{ id }}</div>
+              <div class="font-semibold text-gray-900">{{ worksheetInfo.workNo }}</div>
               <div class="mt-2 grid grid-cols-3 gap-4">
                 <div>
                   <div class="text-gray-500">제품명</div>
-                  <div class="font-medium">고성능 타이어 205/55R16</div>
+                  <div class="font-medium">{{ worksheetInfo.partName }}</div>
                 </div>
                 <div>
                   <div class="text-gray-500">계획수량</div>
-                  <div class="font-medium">1,000개</div>
+                  <div class="font-medium">{{ worksheetInfo.qty }}개</div>
                 </div>
                 <div>
                   <div class="text-gray-500">진행상태</div>
-                  <span class="badge badge-green">진행중</span>
+                  <span :class="getWorkStateClass(worksheetInfo.workState)">
+                    {{ getWorkStateText(worksheetInfo.workState) }}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- BOM 관리 -->
         <div class="card">
           <div class="flex items-center justify-between mb-2">
             <h3 class="section-title">BOM 관리 & 원자재 투입</h3>
             <div class="flex gap-2">
-              <button @click="activeTab='bom'" :class="['btn', activeTab==='bom'?'btn-primary':'bg-gray-100 border']">BOM & 스캔</button>
-              <button @click="activeTab='lots'" :class="['btn', activeTab==='lots'?'btn-primary':'bg-gray-100 border']">투입된 LOT</button>
+              <button
+                @click="activeTab='bom'"
+                :class="['btn', activeTab==='bom'?'btn-primary':'bg-gray-100 border']"
+              >
+                BOM & 스캔
+              </button>
+              <button
+                @click="activeTab='lots'"
+                :class="['btn', activeTab==='lots'?'btn-primary':'bg-gray-100 border']"
+              >
+                투입된 LOT
+              </button>
             </div>
           </div>
 
           <div v-if="activeTab==='bom'">
-            <LotScanInput @add="onAddLot" />
-            <BomMaterialList :materials="materials" />
+            <!-- worksheetSkey prop 전달 -->
+            <LotScanInput
+              :worksheet-skey="worksheetInfo?.worksheetSkey"
+              @add="onAddLot"
+            />
+            <div v-if="loading" class="text-center text-gray-500 py-4">BOM 정보를 불러오는 중...</div>
+            <div v-else-if="error" class="text-center text-red-500 py-4">{{ error }}</div>
+            <BomMaterialList v-else :materials="bomMaterials" />
           </div>
 
           <div v-else class="space-y-3">
-            <div v-if="inputLots.length===0" class="text-center text-gray-500 py-4">투입된 원자재 LOT가 없습니다.</div>
+            <div v-if="inputLots.length===0" class="text-center text-gray-500 py-4">
+              투입된 원자재 LOT가 없습니다.
+            </div>
             <div v-else>
               <div v-for="lot in inputLots" :key="lot.id" class="flex items-center justify-between border rounded p-2">
                 <div>
-                  <div class="font-mono font-medium">{{ lot.id }}</div>
-                  <div class="text-sm text-gray-500">{{ lot.materialName }} ({{ lot.quantity }}kg)</div>
-                  <div class="text-xs text-gray-400">투입시간: {{ lot.inputTime }}</div>
+                  <div class="font-mono font-medium">{{ lot.lotno }}</div>
+                  <div class="text-sm text-gray-500">{{ lot.partCode }}/{{ lot.partName }} ({{ lot.qty || 0 }}{{ lot.unitNm }})</div>
+                  <div class="text-xs text-gray-400">투입시간: {{ lot.createdAt || '-' }}</div>
                 </div>
-                <button @click="removeLot(lot.id)" class="text-red-600 text-sm">삭제</button>
+                <button @click="removeLot(lot)" class="text-red-600 text-sm">삭제</button>
               </div>
 
-              <!-- 합계 -->
               <div class="mt-3 grid grid-cols-2 text-sm border-t pt-2">
                 <div>총 투입 LOT: {{ inputLots.length }}</div>
                 <div>총 투입량: {{ totalQuantity }}kg</div>
@@ -80,89 +103,181 @@
 
       <!-- 우측 컬럼: 생산완료처리 + LOT 관리 -->
       <div class="space-y-6">
-        <!-- 생산완료처리 -->
-        <div class="card">
-          <h3 class="section-title">생산완료처리</h3>
-          <div class="flex gap-3 items-center">
-            <input
-              v-model.number="doneQty"
-              type="number"
-              placeholder="완료된 수량 입력"
-              class="border rounded-md px-3 py-2 text-sm w-20"
-            />
-            <input
-              v-model="remark"
-              type="text"
-              placeholder="특이사항이나 비고를 입력하세요"
-              class="border rounded-md px-3 py-2 text-sm flex-1"
-            />
-            <button class="btn-primary px-4 py-2 whitespace-nowrap">발행</button>
-          </div>
-        </div>
+        <ProductionCompleteForm
+          v-model:doneQty="doneQty"
+          v-model:remark="remark"
+          v-model:worksheetSkey="worksheetSkey"
+          @submit="handleComplete"
+        />
 
-        <!-- LOT 관리 시스템 -->
         <div class="card">
           <div class="flex items-center justify-between mb-2">
             <h3 class="section-title">LOT 관리 시스템</h3>
             <div class="text-xs text-gray-500">작업지시 {{ id }}의 LOT 현황 및 관리</div>
           </div>
-
-          <!-- 25.09.17 하도이 lot 등록 임시 주석 처리 -->
-          <!-- <LotCreateForm @create="createLot" /> -->
           <LotList :lots="lots" class="mt-4" />
         </div>
       </div>
       <!-- 우측 컬럼 end -->
-
     </section>
   </div>
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue'
-  import { useRoute } from 'vue-router'
-  import LotScanInput from '../components/LotScanInput.vue'
-  import BomMaterialList from '../components/BomMaterialList.vue'
-  import LotCreateForm from '../components/LotCreateForm.vue'
-  import LotList from '../components/LotList.vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import LotScanInput from '../components/LotScanInput.vue'
+import BomMaterialList from '../components/BomMaterialList.vue'
+import LotList from '../components/LotList.vue'
+import ProductionCompleteForm from '../components/ProductionCompleteForm.vue'
+import axios from 'axios'
 
-  const route = useRoute()
-  const id = route.params.id
+const route = useRoute()
+const id = route.params.id
 
-  // 생산완료처리
-  const doneQty = ref(0)
-  const quality = ref('합격')
-  const remark = ref('')
+const loading = ref(false)
+const error = ref('')
+const worksheetInfo = ref(null)
+const bomData = ref([])
 
-  // BOM
-  const activeTab = ref('bom')
-  const materials = ref([
-    { id: 'MAT-001', name: '천연고무', used: 45.5, total: 45.5 },
-    { id: 'MAT-002', name: '합성고무', used: 30.2, total: 30.2 },
-    { id: 'MAT-003', name: '카본블랙', used: 12.3, total: 15.8 },
-  ])
+const doneQty = ref(0)
+const remark = ref('')
+const worksheetSkey = computed(() => worksheetInfo.value?.worksheetSkey || '')
 
-  // LOT 관리
-  const inputLots = ref([])
+const activeTab = ref('bom')
 
-  function onAddLot(lotNo) {
-    const lot = {
-      id: lotNo,
-      materialName: '카본블랙',
-      quantity: 1.0,
-      inputTime: new Date().toLocaleTimeString(),
+const bomMaterials = computed(() =>
+  bomData.value.map(bom => ({
+    id: bom.childPartCode,
+    name: bom.childPartName || bom.childPartCode,
+    used: bom.inputQty,
+    total: bom.needQty
+  }))
+)
+
+const inputLots = ref([])
+const lots = ref([])
+
+function getWorkStateText(workState) {
+  const stateMap = { '1':'진행중','2':'완료','3':'대기','4':'중단' }
+  return stateMap[workState] || '알 수 없음'
+}
+
+function getWorkStateClass(workState) {
+  const classMap = { '1':'badge badge-green','2':'badge badge-blue','3':'badge badge-yellow','4':'badge badge-red' }
+  return classMap[workState] || 'badge badge-gray'
+}
+
+// API 호출
+async function fetchWorksheetDetails() {
+  try {
+    loading.value = true
+    error.value = ''
+    const res = await fetch(`http://localhost:8080/api/mixing-detail/worksheet/${id}`)
+    if (!res.ok) throw new Error(`작업지시서 정보를 가져올 수 없습니다: ${res.status}`)
+    worksheetInfo.value = await res.json()
+  } catch (err) { error.value = err.message }
+  finally { loading.value = false }
+}
+
+async function fetchBomDetails() {
+  try {
+    loading.value = true
+    error.value = ''
+    const res = await fetch(`http://localhost:8080/api/mixing-detail/bom/${id}`)
+    if (!res.ok) throw new Error(`BOM 정보를 가져올 수 없습니다: ${res.status}`)
+    bomData.value = await res.json()
+  } catch (err) { error.value = err.message }
+  finally { loading.value = false }
+}
+
+// LOT DB 조회
+async function fetchInputLots() {
+  try {
+    loading.value = true
+
+    if (!worksheetInfo.value?.worksheetSkey) {
+      console.warn("worksheetSkey가 아직 준비되지 않았습니다.")
+      return
     }
-    inputLots.value.push(lot)
 
-    const m = materials.value.find(x => x.id === 'MAT-003')
-    if (m) m.used = Math.min(m.used + lot.quantity, m.total)
+    const skey = worksheetInfo.value.worksheetSkey
+    const res = await fetch(`http://localhost:8080/api/bom/lotList/${id}?worksheetSkey=${skey}`)
+    
+    if (!res.ok) throw new Error(`투입된 LOT 정보를 가져올 수 없습니다: ${res.status}`)
+    
+    inputLots.value = await res.json()
+  } catch (err) {
+    console.error(err)
+    inputLots.value = []
+  } finally {
+    loading.value = false
   }
+}
 
-  function removeLot(lotId) {
-    inputLots.value = inputLots.value.filter(l => l.id !== lotId)
+// LOT 추가 시
+function onAddLot(payload) {
+  // payload = { lotNo, worksheetSkey, result }
+  fetchBomDetails()
+  console.log("LOT 등록 payload:", payload)
+  if (payload.result) {
+    inputLots.value.push({
+      id: payload.lotNo,
+      worksheetSkey: payload.worksheetSkey,
+      result: payload.result
+    })
   }
+}
 
-  const totalQuantity = computed(() =>
-    inputLots.value.reduce((sum, lot) => sum + lot.quantity, 0).toFixed(1)
-  )
+// LOT 삭제
+// LOT 삭제
+async function removeLot(lot) {
+  try {
+    // 삭제 확인
+    const isConfirmed = confirm(`LOT ${lot.lotno}를 삭제하시겠습니까?`)
+    if (!isConfirmed) return
+
+    const skey = worksheetInfo.value.worksheetSkey
+    const res = await fetch(
+      `http://localhost:8080/api/bom/deleteLot?lotNo=${lot.lotno}&worksheetSkey=${skey}`,
+      {
+        method: 'DELETE'
+      }
+    )
+    if (!res.ok) throw new Error(`LOT 삭제 실패: ${res.status}`)
+
+    // 화면에서 제거
+    inputLots.value = inputLots.value.filter(l => l.lotno !== lot.lotno)
+
+    // 성공 알림
+    alert(`LOT ${lot.lotno}가 삭제되었습니다.`)
+    fetchBomDetails()
+  } catch (err) {
+    console.error(err)
+    alert('LOT 삭제 중 오류가 발생했습니다.')
+  }
+}
+
+function handleComplete() {
+  console.log("작업 완료 처리 실행!")
+  // 여기에 axios 호출 or 상태 업데이트 넣으면 됨
+}
+
+
+
+const totalQuantity = computed(() =>
+  inputLots.value.reduce((sum, lot) => sum + (lot.qty || 0), 0).toFixed(1)
+)
+
+// activeTab이 'lots'일 때만 inputLots 조회
+watch(activeTab, (newTab) => {
+  if (newTab === 'lots') {
+    fetchInputLots()
+  }
+})
+
+onMounted(() => {
+  fetchWorksheetDetails()
+  fetchBomDetails()
+})
 </script>

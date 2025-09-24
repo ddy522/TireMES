@@ -16,6 +16,7 @@
         <result column="work_state"  property="workStatus"/>
         <result column="part_name"   property="partName"/>
         <result column="process_name_eng"  property="processNameEng"/>
+        <result column="worksheetSkey"  property="worksheetSkey"/>
     </resultMap>
 
     <!--전체 작업지시 조회 -->
@@ -28,7 +29,8 @@
         w.process_code,
         w.qty,
         w.work_state,
-        p.part_name
+        p.part_name,
+        w.skey as worksheetSkey
         FROM worksheet w
         LEFT JOIN part p
         ON w.part_code = p.part_code
@@ -45,7 +47,8 @@
         w.qty,
         w.work_state,
         p.part_name,
-        pr.process_name_eng
+        pr.process_name_eng,
+        w.skey as worksheetSkey
         FROM worksheet w
         LEFT JOIN part p
         ON w.part_code = p.part_code
