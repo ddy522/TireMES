@@ -1,119 +1,182 @@
 <template>
-  <div class="space-y-6">
-    <!-- 상단: 뒤로가기 + 제목 -->
+  <div class="space-y-4 min-h-screen">
+    <!-- 헤더 -->
     <div class="flex items-center gap-2 text-sm text-gray-500">
-      <RouterLink to="/extrusion" class="hover:underline">◀ 뒤로가기</RouterLink>
-      <h1 class="text-xl font-bold text-gray-900">압출 작업화면</h1>
-      <span class="ml-auto text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded px-2 py-0.5">실시간 작업</span>
+      <h1 class="text-2xl font-bold text-gray-900">설비 관리</h1>
+      <span class="ml-auto text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded px-2 py-0.5">
+        /equipment
+      </span>
     </div>
 
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- 좌측 컬럼: 작업지시 정보 -->
-      <div class="space-y-6">
-        <div class="card">
-          <h3 class="section-title">작업지시 정보</h3>
-          <div class="flex items-center gap-4">
-            <div class="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center">
-              <span class="text-3xl">🧵</span>
+    <!-- ===== 전체 레이아웃 ===== -->
+    <div class="grid grid-cols-12 gap-3 h-[calc(100vh-110px)]">
+      <!-- 좌측: 설비 정보(값 제거된 스냅샷 + 실시간 정보 버튼 포함) -->
+      <section class="card col-span-12 lg:col-span-3 lg:row-span-2 flex flex-col overflow-auto">
+        <h3 class="section-title">설비 정보</h3>
+
+        <!-- 선택 -->
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <select v-model="proc" class="border rounded px-2 py-1">
+            <option value="믹싱">믹싱</option>
+            <option value="압출">압출</option>
+            <option value="재단">재단</option>
+            <option value="검사">검사</option>
+          </select>
+          <select v-model="equip" class="border rounded px-2 py-1">
+            <option value="믹싱기 A">믹싱기 A</option>
+            <option value="믹싱기 B">믹싱기 B</option>
+            <option value="압출기 A">압출기 A</option>
+            <option value="압출기 B">압출기 B</option>
+          </select>
+          <button class="col-span-2 btn-secondary">정비 이력 보기</button>
+        </div>
+
+        <!-- 기본 정보 -->
+        <div class="mt-4 space-y-1 text-sm">
+          <div>공정: {{ proc }}</div>
+          <div>설비: {{ equip }}</div>
+          <div>
+            가동:
+            <span class="inline-flex items-center gap-1">
+              <span class="h-2 w-2 rounded-full bg-green-500"></span>
+              <span class="text-green-700 font-semibold">가동</span>
+            </span>
+          </div>
+          <div>상태: 정상</div>
+        </div>
+
+        <!-- ✅ 상태 스냅샷: 값 제거, 텍스트만 표시 -->
+        <div class="mt-4">
+          <h4 class="text-sm font-semibold text-gray-800 mb-2">상태 스냅샷</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <!-- 값(number) 렌더링 없음: 라벨만 출력 -->
+            <div
+              v-for="label in snapshotLabels"
+              :key="label"
+              class="box"
+            >
+              {{ label }}
             </div>
-            <div class="text-sm">
-              <div class="text-gray-500">작업지시번호</div>
-              <div class="font-semibold text-gray-900">{{ id }}</div>
-              <div class="mt-2 grid grid-cols-3 gap-4">
-                <div>
-                  <div class="text-gray-500">제품명</div>
-                  <div class="font-medium">프리미엄 타이어 225/60R17</div>
-                </div>
-                <div>
-                  <div class="text-gray-500">계획수량</div>
-                  <div class="font-medium">800개</div>
-                </div>
-                <div>
-                  <div class="text-gray-500">진행상태</div>
-                  <span class="badge badge-yellow">대기중</span>
-                </div>
-              </div>
+          </div>
+        </div>
+
+        <!-- 빠른 작업 + 실시간 정보 -->
+        <div class="mt-4">
+          <h4 class="text-sm font-semibold text-gray-800 mb-2">빠른 작업</h4>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="btn-secondary">고장 등록</button>
+            <button class="btn-secondary">이상 징후</button>
+            <button class="btn-secondary">긴급 경고</button>
+            <button class="btn-secondary">예비품 요청</button>
+            <button class="col-span-2 btn-primary">실시간 정보</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 우측 상단: 설비 상태 데이터(기존 유지) -->
+      <section class="card col-span-12 lg:col-span-9">
+        <h3 class="section-title">설비 상태 데이터</h3>
+
+        <!-- 헤더 정보 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600 mb-2">
+          <div class="border rounded p-2 bg-gray-50">
+            <div class="text-gray-500">정비 유형</div>
+            <div class="font-medium">정기점검</div>
+          </div>
+          <div class="border rounded p-2 bg-gray-50">
+            <div class="text-gray-500">담당자</div>
+            <div class="font-medium">박민수</div>
+          </div>
+          <div class="border rounded p-2 bg-gray-50">
+            <div class="text-gray-500">최근 정비</div>
+            <div class="font-medium">2025-09-10</div>
+          </div>
+        </div>
+
+        <!-- 뷰 토글 -->
+        <div class="flex items-center gap-2 mb-2">
+          <button class="btn-secondary" :class="{ 'ring-2 ring-blue-500': view==='minute' }" @click="view='minute'">minute</button>
+          <button class="btn-secondary" :class="{ 'ring-2 ring-blue-500': view==='hour' }" @click="view='hour'">hour</button>
+          <button class="btn-secondary" :class="{ 'ring-2 ring-blue-500': view==='day' }" @click="view='day'">day</button>
+          <span class="text-sm text-gray-500">· 선택 항목: 온도 · 현재값: 70</span>
+          <div class="ml-auto flex gap-2">
+            <button class="btn-secondary">« 처음</button>
+            <button class="btn-secondary">( 이전</button>
+            <button class="btn-secondary">다음 )</button>
+            <button class="btn-secondary">끝 »</button>
+          </div>
+        </div>
+
+        <!-- 차트 자리 -->
+        <div class="h-64 flex items-center justify-center border rounded bg-white">
+          <div class="text-gray-400">📊 차트 영역</div>
+        </div>
+
+        <!-- 타임라인 -->
+        <div class="mt-3">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600">타임라인</span>
+            <input type="range" min="0" max="60" v-model="timeline" class="flex-1" />
+            <span class="text-xs text-gray-500">{{ timeline }}/60</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 우측 하단: 알림(기존 유지) -->
+      <section class="card col-span-12">
+        <h3 class="section-title">알림</h3>
+        <ul class="text-sm text-gray-700 space-y-2">
+          <li class="flex gap-2 items-start">
+            <span class="mt-1 h-2 w-2 rounded-full bg-red-500"></span>
+            <div>
+              <div class="text-red-600">온도 경고: 85℃ 초과</div>
+              <div class="text-gray-500 text-xs">오늘 14:22</div>
             </div>
-          </div>
+          </li>
+          <li class="flex gap-2 items-start">
+            <span class="mt-1 h-2 w-2 rounded-full bg-yellow-500"></span>
+            <div>
+              <div class="text-yellow-700">점검 미이행 항목</div>
+              <div class="text-gray-500 text-xs">어제 17:05</div>
+            </div>
+          </li>
+          <li class="flex gap-2 items-start">
+            <span class="mt-1 h-2 w-2 rounded-full bg-blue-600"></span>
+            <div>
+              <div class="text-blue-700">예비품 재고 부족(벨트)</div>
+              <div class="text-gray-500 text-xs">3일 전</div>
+            </div>
+          </li>
+        </ul>
+        <div class="text-right mt-3">
+          <button class="btn-secondary">모두 확인</button>
         </div>
-      </div>
-      <!-- 좌측 컬럼 end -->
-
-      <!-- 우측 컬럼: 생산완료처리 + LOT 관리 -->
-      <div class="space-y-6">
-        <!-- 생산완료처리 -->
-        <div class="card">
-          <h3 class="section-title">생산완료처리</h3>
-          <div class="flex gap-3 items-center">
-            <input
-              v-model.number="doneQty"
-              type="number"
-              placeholder="완료된 수량 입력"
-              class="border rounded-md px-3 py-2 text-sm w-20"
-            />
-            <!-- <select v-model="quality" class="border rounded-md px-3 py-2 text-sm w-24">
-              <option value="합격">합격</option>
-              <option value="불합격">불합격</option>
-            </select> -->
-            <input
-              v-model="remark"
-              type="text"
-              placeholder="특이사항이나 비고를 입력하세요"
-              class="border rounded-md px-3 py-2 text-sm flex-1"
-            />
-            <button class="btn-primary px-4 py-2 whitespace-nowrap">발행</button>
-          </div>
-        </div>
-
-        <!-- LOT 관리 시스템 -->
-        <div class="card">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="section-title">LOT 관리 시스템</h3>
-            <div class="text-xs text-gray-500">작업지시 {{ id }}의 LOT 현황 및 관리</div>
-          </div>
-
-          <!-- 25.09..17 하도이 lot 발행 주석처리  -->
-          <!-- <LotCreateForm @create="createLot" /> -->
-
-          <LotList :lots="lots" class="mt-4" />
-        </div>
-      </div>
-      <!-- 우측 컬럼 end -->
-    </section>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import LotCreateForm from '../components/LotCreateForm.vue'
-import LotList from '../components/LotList.vue'
 
-const route = useRoute()
-const id = route.params.id
+const proc = ref('믹싱')
+const equip = ref('믹싱기 A')
+const view = ref('day')
+const timeline = ref(0)
 
-// 생산완료처리
-const doneQty = ref(0)
-const quality = ref('합격')
-const remark = ref('')
-
-// LOT 관리
-const lots = ref([
-  { no: 'LOT-W0001-001', qty: 25, createdAt: '14:30', status: '완료', currentProc: '재단', quality: '합격', history: ['믹싱', '압출'] },
-  { no: 'LOT-W0001-002', qty: 30, createdAt: '15:15', status: '진행중', currentProc: '압출', quality: '검사중', history: ['믹싱'] },
-  { no: 'LOT-W0001-003', qty: 20, createdAt: '15:45', status: '대기', currentProc: '믹싱', quality: '대기', history: ['믹싱'] },
-])
-
-function createLot(qty) {
-  const idx = (lots.value.length + 1).toString().padStart(3, '0')
-  lots.value.push({
-    no: `LOT-W0001-${idx}`,
-    qty,
-    createdAt: new Date().toTimeString().slice(0,5),
-    status: '대기',
-    currentProc: '압출',
-    quality: '대기',
-    history: ['믹싱']
-  })
-}
+/** 스냅샷에 숫자/값은 포함하지 않음 — 라벨만 */
+const snapshotLabels = [
+  '온도','습도','전력','분진','VOCs','토크','두께','길이','장력','압력'
+]
 </script>
+
+<style scoped>
+.card { @apply bg-white border rounded-lg p-4 shadow-sm; }
+.section-title { @apply font-semibold text-gray-800 mb-2; }
+
+/* 스냅샷 박스: 값 대신 라벨만 보이도록 단순 스타일 */
+.box { @apply border rounded p-2 bg-gray-50 text-gray-700; }
+
+.btn-primary { @apply bg-blue-600 text-white rounded px-3 py-2 text-sm hover:bg-blue-700; }
+.btn-secondary { @apply bg-gray-100 text-gray-700 rounded px-3 py-2 text-sm hover:bg-gray-200; }
+</style>

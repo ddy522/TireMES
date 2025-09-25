@@ -9,6 +9,8 @@ import InspectionList from '../pages/InspectionList.vue'
 import InspectionDetail from '../pages/InspectionDetail.vue'
 import Materials from '../pages/Materials.vue'
 import LotTracking from '../pages/LotTracking.vue'
+import EquipmentDashboard from '../pages/EquipmentDashboard.vue'
+
 
 const routes = [
   { path: '/', redirect: '/mixing' },
@@ -22,6 +24,7 @@ const routes = [
   { path: '/inspection/:id', name: 'InspectionDetail', component: InspectionDetail, props: true },
   { path: '/materials', name: 'Materials', component: Materials },
   { path: '/lot-tracking', name: 'LotTracking', component: LotTracking },
+  { path: '/equipment', name: 'EquipmentDashboard', component: EquipmentDashboard },
 ]
 
 export default createRouter({

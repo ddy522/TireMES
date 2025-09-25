@@ -51,6 +51,10 @@
           로트 추적
         </RouterLink>
 
+        <RouterLink class="flex items-center w-full text-left px-3 py-2 rounded hover:bg-gray-100" to="/equipment">
+          설비 관리
+        </RouterLink>
+
       </nav>
       <div class="p-4 text-xs text-gray-400 border-t">v1.0.0 | 2024.12.16</div>
     </aside>
