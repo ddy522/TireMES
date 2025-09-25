@@ -22,7 +22,8 @@
       </div>
     </div>
         <WorkOrderTable
-          @bulk-start="onBulkStart" 
+          @bulk-start="onBulkStart"
+          @start="onStartSingle"
     />
 
     <!-- <WorkOrderTable :orders="workOrders" @start="goDetail" /> -->
@@ -39,15 +40,35 @@ import axios from 'axios'
 
 const router = useRouter()
 const lotInput = ref('')
-
 const tableRef = ref(null)
 
-async function onBulkStart({ workNos, runCount }) {
+//  선택 작업 시작 (일괄) → 라즈베리 예측 호출 + 상세 페이지 이동
+async function onBulkStart({ workNos, count }) {
   try {
-    // ✅ 선택된 작업지시 번호들과 작업 수(runCount) 서버에 전달
-    await axios.post('/api/inspection/start/bulk', { workNos, runCount })
 
-    // ✅ 성공 후 테이블 새로고침
+    const { data : piResp } = await axios.post(
+      '/api/inspection/predict',
+      {count}, 
+      { timeout: 15000 }
+    )
+    await axios.post('/api/inspection/start', { workNos })
+    
+    // 선택된 작업지시 번호들과 작업 수(runCount) 서버에 전달
+    console.log('선택된 개수:', count)
+    console.log('선택된 목록:', workNos)
+    console.log('PI 응답 :', piResp)
+
+    alert(`predict success: status=${piResp?.status}, actual_count=${piResp?.actual_count}`)
+   
+    // 라즈베리 응답까지 끝나면 상세 페이지로 이동
+    router.push({
+      name: 'InspectionDetail',
+      query: { workNos: workNos.join(',') }
+    })
+
+
+
+    // 성공 후 테이블 새로고침
     tableRef.value?.reload?.()
   } catch (err) {
     console.error(err)
@@ -77,12 +98,12 @@ async function onBulkStart({ workNos, runCount }) {
 // }
 
 // }
-// function goInspectMany(workNos) {
-//   // ✅ 선택된 workNos를 가지고 검사 상세 페이지로 이동
-//   router.push({
-//     name: 'InspectionDetail',
-//     query: { workNos: workNos.join(',') }
-//   })
-// }
+function goInspectMany(workNos) {
+  // 선택된 workNos를 가지고 검사 상세 페이지로 이동
+  router.push({
+    name: 'InspectionDetail',
+    query: { workNos: workNos.join(',') }
+  })
+}
 
 </script>
