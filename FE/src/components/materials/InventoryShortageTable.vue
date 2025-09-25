@@ -15,10 +15,12 @@
         <td class="py-4 text-center" colspan="5">불러오는 중…</td>
       </tr>
 
-      <tr v-else-if="shortageRows.length === 0">
-        <td class="py-4 text-center" colspan="5">부족 자재가 없습니다</td>
+      <!-- ✅ 전체 보기: rows 기준으로 빈 상태 판단 -->
+      <tr v-else-if="rows.length === 0">
+        <td class="py-4 text-center" colspan="5">데이터가 없습니다</td>
       </tr>
 
+      <!-- ✅ 전체 행 출력 -->
       <tr v-else v-for="r in limitedRows" :key="r.partCode" class="border-t">
         <td class="py-2 px-3">{{ r.partCode }}</td>
         <td class="px-3">{{ r.partName }}</td>
@@ -36,7 +38,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { fetchInventoryAll } from '../../api/inventoryListSearch.js'
 
-/** 옵션: 화면에 몇 줄만 보여줄지 (기본 5줄). 전체를 보여주려면 :limit="0" */
 const props = defineProps({ limit: { type: Number, default: 5 } })
 
 const loading = ref(false)
@@ -54,37 +55,37 @@ onMounted(async () => {
   }
 })
 
-/** 부족 계산:
- * - 우선 expectedConsumption 사용
- * - 없으면 safeQty 사용
+/* ✅ 전체 행 계산 (필터 제거)
+ * - expected = expectedConsumption ?? safeQty ?? 0
  * - shortage = max(0, expected - currInventory)
+ * - 중요도 높게 보기 위해 부족 많은 순 정렬(원본 순서 유지하려면 sort 라인 주석 처리)
  */
-const shortageRows = computed(() => {
-  return (rows.value || [])
-    .map(r => {
-      const curr = Number(r.currInventory ?? 0)
-      const expected = Number(
-        r.expectedConsumption ?? r.safeQty ?? 0
-      )
-      const shortage = Math.max(0, expected - curr)
-      return {
-        partCode: r.partCode,
-        partName: r.partName,
-        currInventory: curr,
-        expected,
-        shortage,
-      }
-    })
-    .filter(r => r.shortage > 0)
-    .sort((a, b) => b.shortage - a.shortage) // 부족 많은 순
+const displayRows = computed(() => {
+  const mapped = (rows.value || []).map(r => {
+    const curr = Number(r.currInventory ?? 0)
+    const expected = Number(r.expectedConsumption ?? r.safeQty ?? 0)
+    const shortage = Math.max(0, expected - curr)
+    return {
+      partCode: r.partCode,
+      partName: r.partName,
+      currInventory: curr,
+      expected,
+      shortage,
+    }
+  })
+  // 중요도 순서로 보고 싶다면 유지:
+  return mapped.sort((a, b) => b.shortage - a.shortage)
+
+  // 원본 순서를 유지하려면 위 sort를 주석 처리하고 아래 반환:
+  // return mapped
 })
 
 const limitedRows = computed(() =>
-  props.limit > 0 ? shortageRows.value.slice(0, props.limit) : shortageRows.value
+  props.limit > 0 ? displayRows.value.slice(0, props.limit) : displayRows.value
 )
 
 function fmt(n) {
   const v = Number(n)
-  return Number.isFinite(v) ? v.toLocaleString() : n ?? '-'
+  return Number.isFinite(v) ? v.toLocaleString() : (n ?? '-')
 }
 </script>

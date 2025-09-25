@@ -30,7 +30,8 @@
             w.qty,
             w.work_state,
             p.part_name,
-            w.skey as worksheetSkey
+            w.skey as worksheetSkey,
+            p.std
         FROM worksheet w
         LEFT JOIN part p ON w.part_code = p.part_code
         WHERE w.useyn = 'Y'
@@ -48,7 +49,8 @@
         w.work_state,
         p.part_name,
         pr.process_name_eng,
-        w.skey as worksheetSkey
+        w.skey as worksheetSkey,
+        p.std
         FROM worksheet w
         LEFT JOIN part p
         ON w.part_code = p.part_code
@@ -70,7 +72,8 @@
         w.qty,
         w.work_state,
         p.part_name,
-        pr.process_name_eng
+        pr.process_name_eng,
+        p.std
         FROM worksheet w
         LEFT JOIN part p
         ON w.part_code = p.part_code

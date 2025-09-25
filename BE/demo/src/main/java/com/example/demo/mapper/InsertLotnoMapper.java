@@ -40,5 +40,10 @@ public interface InsertLotnoMapper {
                           @Param("worksheetSkey") String worksheetSkey,
                           @Param("remark") String remark);
 
+    void insertInspectionProduction(@Param("workNo") String workNo,
+                          @Param("decision") int decision);
+
+
+
 
 }

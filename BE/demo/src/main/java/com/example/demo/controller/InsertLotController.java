@@ -33,7 +33,6 @@ public class InsertLotController {
         }
 
         return result;
-
     }
 
     @PostMapping("/insertProduction")
@@ -55,4 +54,44 @@ public class InsertLotController {
 
         return result;
     }
+    @PostMapping("/insertInspectionProduction")
+    public Map<String,Object> insertInspectionProduction(@RequestBody Map<String, Object> param){
+        Map<String, Object> result = new HashMap<>();
+
+        String workNo = (String) param.get("workNo");
+
+        Number d = (Number) param.get("decision"); // 안전
+        int decision = d == null ? 0 : d.intValue();
+
+        try {
+            insertLotService.insertInspectionProduction(workNo, decision);
+            System.out.println(workNo);
+            result.put("success", true);
+            result.put("message", "생산 LOT 등록 성공!");
+        } catch(RuntimeException e){
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+
+        return result;
+    }
+//    @PostMapping("/insertInspectionProduction")
+//    public Map<String,Object> insertInspectionProduction(@RequestBody Map<String, Object> param){
+//        Map<String, Object> result = new HashMap<>();
+//
+//        String workNo = (String) param.get("workNo");
+//        int decision = (int) param.get("decision");
+//
+//
+//        try {
+//            insertLotService.insertInspectionProduction(workNo, decision);
+//            result.put("success", true);
+//            result.put("message", "생산 LOT 등록 성공!");
+//        } catch(RuntimeException e){
+//            result.put("success", false);
+//            result.put("message", e.getMessage());
+//        }
+//
+//        return result;
+//    }
 }

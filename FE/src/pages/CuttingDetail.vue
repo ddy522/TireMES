@@ -16,6 +16,38 @@
           :error="error" 
           process="03"
         />
+
+      <div class="card">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="section-title">작업지시서</h3>
+          <button
+            class="text-xs bg-white border rounded px-2 py-0.5"
+            @click="sopDlg.showModal()"
+          >확대</button>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl border bg-gray-50 aspect-video">
+          <img
+            :src="sopImg"
+            alt="작업지시서"
+            class="w-full h-full object-contain"
+            @click="sopDlg.showModal()"
+          />
+        </div>
+
+        <!-- 확대 모달 -->
+        <dialog ref="sopDlg" class="p-0 rounded-xl backdrop:bg-black/40">
+          <div class="bg-white rounded-xl overflow-hidden max-w-5xl">
+            <div class="flex items-center justify-between px-4 py-2 border-b">
+              <div class="font-medium">작업지시서</div>
+              <button class="text-sm text-gray-500 hover:text-gray-700" @click="sopDlg.close()">닫기</button>
+            </div>
+            <div class="p-4">
+              <img :src="sopImg" alt="작업지시서 확대" class="w-full h-auto object-contain max-h-[80vh]" />
+            </div>
+          </div>
+        </dialog>
+  </div>
       </div>
       <!-- 좌측 컬럼 end -->
 
@@ -96,6 +128,8 @@ const lots = ref([
 //     history: ['믹싱']
 //   })
 // }
+
+const sopImg = new URL('../assets/sop/work-instruction.png', import.meta.url).href
 
 async function fetchWorksheetDetails() {
   try {

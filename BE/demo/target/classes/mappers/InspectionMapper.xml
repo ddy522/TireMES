@@ -32,4 +32,42 @@
         SET v.work_no = n.work_no,
         v.useyn   = 'Y';
     </update>
+
+
+    <resultMap id="VisionDecisionMap" type="com.example.demo.model.VisionDecisionModel">
+        <result property="id" column="id"/>
+        <result property="workNo" column="work_no"/>
+        <result property="inspectionResult" column="inspection_result"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+
+    <select id="selectLatestVisionDecision" parameterType="string" resultMap="VisionDecisionMap">
+        SELECT id, work_no, inspection_result, image_url
+        FROM vision_result
+        WHERE work_no = #{workNo}
+        AND useyn = 'Y'
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+<!--    <resultMap id="VisionDecisionMap" type="com.example.demo.dto.VisionDecisionDTO">-->
+<!--        <result property="id" column="id"/>-->
+<!--        <result property="workNo" column="work_no"/>-->
+<!--        <result property="inspectionResult" column="inspection_result"/>-->
+<!--        <result property="imageUrl" column="image_url"/>-->
+<!--    </resultMap>-->
+
+<!--    <select id="selectLatestVisionDecision" parameterType="string" resultMap="VisionDecisionMap">-->
+<!--        SELECT id, work_no, inspection_result, image_url-->
+<!--        FROM vision_result-->
+<!--        WHERE work_no = #{workNo}-->
+<!--        AND useyn = 'Y'-->
+<!--        ORDER BY id DESC-->
+<!--        LIMIT 1-->
+<!--    </select>-->
+
+
+
+
+
 </mapper>

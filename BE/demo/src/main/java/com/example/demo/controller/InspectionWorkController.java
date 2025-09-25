@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.VisionDecisionModel;
 import com.example.demo.service.InspectionOrchestrator;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.service.VisionDecisionService;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import java.util.List;
 public class InspectionWorkController {
 
     private final InspectionOrchestrator orchestrator;
+    private final VisionDecisionService visionDecisionService;
 
     // ✅ 선택된 작업지시를 vision_result에 insert
     @PostMapping("/start")
@@ -25,5 +28,10 @@ public class InspectionWorkController {
     @Data
     public static class WorkNoRequest {
         private List<String> workNos;
+    }
+
+    @GetMapping("/decision")
+    public ResponseEntity<VisionDecisionModel> getDecision(@RequestParam String workNo) {
+        return ResponseEntity.ok(visionDecisionService.getLatestDecision(workNo));
     }
 }

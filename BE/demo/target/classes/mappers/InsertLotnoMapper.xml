@@ -13,8 +13,6 @@
 <!--        INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'-->
 <!--        INNER JOIN worksheet w ON w.skey = s.p_skey-->
 <!--        WHERE l.lotno = #{lotNo}-->
-
-
         SELECT count(w.work_no) > 0
         FROM lot l
         INNER JOIN worksheet w ON w.skey = l.r_skey
@@ -121,4 +119,9 @@
     <update id="insertProduction" parameterType="map">
             CALL insert_lotno_production(#{worksheetSkey}, #{doneQty}, #{remark});
     </update>
+
+    <update id="insertInspectionProduction">
+        CALL insert_inspection(#{workNo}, #{decision});
+    </update>
+
 </mapper>
