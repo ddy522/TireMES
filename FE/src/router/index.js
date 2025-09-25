@@ -5,12 +5,14 @@ import ExtrusionList from '../pages/ExtrusionList.vue'
 import ExtrusionDetail from '../pages/ExtrusionDetail.vue'  
 import CuttingList from '../pages/CuttingList.vue'
 import CuttingDetail from '../pages/CuttingDetail.vue'
-import MoldingList from '../pages/CuttingList.vue'
+import MoldingList from '../pages/MoldingList.vue'
+import MoldingDetail from '../pages/MoldingDetail.vue'
 import InspectionList from '../pages/InspectionList.vue'
 import InspectionDetail from '../pages/InspectionDetail.vue'
 import Materials from '../pages/Materials.vue'
 import LotTracking from '../pages/LotTracking.vue'
 import CuringList from '../pages/CuringList.vue'
+import CuringDetail from '../pages/CuringDetail.vue'
 import DeliveryList from '../pages/DeliveryList.vue'
 
 import QualityLayout from '../pages/quality/QualityLayout.vue'
@@ -33,8 +35,9 @@ const routes = [
   { path: '/cutting', name: 'CuttingList', component: CuttingList },
   { path: '/cutting/:id', name: 'CuttingDetail', component: CuttingDetail, props: true },
   { path: '/curing', name: 'CuringList', component: CuringList },
-  // { path: '/curing/:id', name: 'CuringDetail', component: CuringDetail, props: true },
+  { path: '/curing/:id', name: 'CuringDetail', component: CuringDetail, props: true },
   { path: '/molding', name: 'MoldingList', component: MoldingList },
+  { path: '/molding/:id', name: 'MoldingDetail', component: MoldingDetail },
   { path: '/inspection', name: 'InspectionList', component: InspectionList },
   { path: '/inspection/run', name: 'InspectionDetail', component: InspectionDetail, props: true },
   { path: '/delivery', name: 'DeliveryList', component: DeliveryList },
