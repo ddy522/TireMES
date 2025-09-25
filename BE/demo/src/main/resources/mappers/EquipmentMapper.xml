@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.EquipmentMapper">
+
+    <select id="getMetricData" resultType="com.example.demo.model.MetricModel">
+        SELECT
+        <choose>
+            <when test="scale == 'minute'">
+                DATE_FORMAT(plc_data, '%Y-%m-%d %H:%i') AS label
+            </when>
+            <when test="scale == 'hour'">
+                DATE_FORMAT(plc_data, '%Y-%m-%d %H') AS label
+            </when>
+            <otherwise>
+                DATE(plc_data) AS label
+            </otherwise>
+        </choose>,
+        AVG(value) AS value
+        FROM plc_data
+        WHERE machine = 'M001'
+        AND gubun = #{metric}
+        GROUP BY
+        <choose>
+            <when test="scale == 'minute'">
+                DATE_FORMAT(plc_data, '%Y-%m-%d %H:%i')
+            </when>
+            <when test="scale == 'hour'">
+                DATE_FORMAT(plc_data, '%Y-%m-%d %H')
+            </when>
+            <otherwise>
+                DATE(plc_data)
+            </otherwise>
+        </choose>
+        ORDER BY plc_data
+    </select>
+
+</mapper>
