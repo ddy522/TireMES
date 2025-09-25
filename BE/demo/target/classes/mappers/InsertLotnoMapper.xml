@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.InsertLotnoMapper">
+
+
+    <!-- 1. LOT와 작업지시 연결 여부 확인 -->
+    <select id="isLotLinkedToWorkOrder" resultType="boolean" parameterType="string">
+<!--        SELECT count(w.work_no) > 0-->
+<!--        FROM lot l-->
+<!--        INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'-->
+<!--        INNER JOIN worksheet w ON w.skey = s.p_skey-->
+<!--        WHERE l.lotno = #{lotNo}-->
+
+
+        SELECT count(w.work_no) > 0
+        FROM lot l
+        INNER JOIN worksheet w ON w.skey = l.r_skey
+        WHERE l.lotno = #{lotNo}
+    </select>
+
+    <!-- 2. 동일 work_no + process_code 존재 여부 확인 -->
+    <select id="existsWorkNoProcess" resultType="boolean" parameterType="map">
+            SELECT count(*)>0
+            FROM worksheet
+            WHERE work_no IN (
+                SELECT w.work_no
+                FROM lot l
+                INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'
+                INNER JOIN worksheet w ON w.skey = s.p_skey
+                WHERE lotno =#{lotNo}
+
+            )
+            AND process_code IN (SELECT process_no FROM process WHERE process_name_eng = #{proc})
+
+    </select>
+
+    <!-- 3. LOT의 다음 공정 조회 -->
+    <select id="getNextProcess" resultType="string" parameterType="string">
+        SELECT process_name_eng
+        FROM process
+        WHERE process_no > (
+        SELECT process_no
+        FROM lot
+        WHERE lotno = #{lotNo}
+        LIMIT 1
+        )
+        ORDER BY process_no
+        LIMIT 1
+    </select>
+    <!-- MySQL 프로시저 호출 -->
+    <update id="insertLotProcedure" parameterType="map">
+        CALL insert_worksheet_by_lot(#{lotno}, #{proc});
+    </update>
+
+
+    <select id="getProcessNo" resultType="string" parameterType="string">
+        select process_no
+        from lot
+        where lotno = #{lotno}
+    </select>
+
+    <select id="isLotInBom" resultType="boolean" parameterType="string">
+        SELECT COUNT(*) > 0
+        FROM bom_h h
+        LEFT JOIN bom_d d ON d.p_skey = h.skey
+        WHERE h.part_code = (
+        SELECT w.part_code
+        FROM worksheet w
+        WHERE w.skey = #{worksheet_skey}
+        )
+        AND d.child_part_code = (
+        SELECT l.part_code
+        FROM lot l
+        WHERE l.lotno = #{lotno}
+        );
+    </select>
+
+
+    <select id="isLotAlreadyInserted" resultType="boolean" parameterType="string">
+        SELECT COUNT(*) > 0
+        FROM skeyconnect
+        WHERE c_table = 'material'
+        AND p_skey = #{worksheet_skey}
+        AND c_lotno = #{lotno};
+    </select>
+
+    <update id="materialInsertLot" parameterType="map">
+        CALL insert_lot01(#{lotno}, #{worksheet_skey}, #{proc});
+    </update>
+
+
+    <select id="selectInputLots" resultType="com.example.demo.model.InputLotListModel">
+        SELECT l.lotno,
+        l.part_code,
+        p.part_name,
+        l.qty,
+        sc.created_at,
+        c1.code_name AS unitNm
+        FROM skeyconnect sc
+        LEFT JOIN lot l ON l.skey = sc.c_skey
+        LEFT JOIN part p ON p.part_code = l.part_code
+        LEFT JOIN (
+        SELECT concat(c.group_code, c.code_no) AS unique_cd, code_name
+        FROM groupcode g
+        LEFT JOIN commoncode c ON c.group_code = g.group_code
+        WHERE g.group_code = 'UN'
+        ) c1 ON c1.unique_cd = p.unit
+        WHERE p_skey = #{worksheetSkey}
+        AND c_table = 'material'
+    </select>
+
+    <delete id="deleteLot">
+        DELETE FROM skeyconnect
+        WHERE c_lotno = #{lotNo}
+        AND p_skey = #{worksheetSkey}
+    </delete>
+
+    <update id="insertProduction" parameterType="map">
+            CALL insert_lotno_production(#{worksheetSkey}, #{doneQty}, #{remark});
+    </update>
+</mapper>

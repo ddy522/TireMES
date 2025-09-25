@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.EquipmentMapper">
+
+    <select id="getMetricData" resultType="com.example.demo.model.MetricModel">
+        SELECT
+        <choose>
+            <when test="scale == 'minute'">
+                TIME_FORMAT(plc_data, '%H:%i') AS label
+            </when>
+            <when test="scale == 'hour'">
+                HOUR(plc_data) AS label
+            </when>
+            <otherwise>
+                DATE(plc_data) AS label
+            </otherwise>
+        </choose>,
+        AVG(value) AS value,
+        gubun
+        FROM plc_data
+        WHERE machine = #{eqId}
+        <choose>
+            <when test="scale == 'minute'">
+                AND DATE(plc_data) = CURDATE()
+            </when>
+            <when test="scale == 'hour'">
+                AND DATE(plc_data) = CURDATE()
+            </when>
+            <otherwise>
+                AND plc_data >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            </otherwise>
+        </choose>
+        <if test="metric != null and metric != ''">
+            AND gubun = #{metric}
+        </if>
+        GROUP BY
+        <choose>
+            <when test="scale == 'minute'">
+                DATE_FORMAT(plc_data, '%H:%i')
+            </when>
+            <when test="scale == 'hour'">
+                HOUR(plc_data)
+            </when>
+            <otherwise>
+                DATE(plc_data)
+            </otherwise>
+        </choose>, gubun
+        ORDER BY plc_data, gubun
+    </select>
+
+</mapper>
