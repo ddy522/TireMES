@@ -30,9 +30,22 @@
       </div>
     </div>
 
+    <!-- ✅ 버튼만, 오른쪽 정렬 -->
+    <div class="flex justify-end gap-2">
+      <button class="px-4 py-2 rounded-lg border bg-white hover:bg-gray-50">
+        금형 교체
+      </button>
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        교체 완료
+      </button>
+    </div>
+
+    <!-- 작업지시 목록 -->
     <WorkOrderTable :orders="workOrders" @start="goDetail" />
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, onMounted } from 'vue'

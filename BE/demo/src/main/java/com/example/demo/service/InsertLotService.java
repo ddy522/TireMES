@@ -90,6 +90,18 @@ public class InsertLotService {
         }
     }
 
+    @Transactional
+    public void insertInspectionProduction(String workNo, int decision) {
+        try {
+            // 검증 통과 시 프로시저 호출
+            insertLotnoMapper.insertInspectionProduction(workNo, decision);  // MySQL 프로시저 호출
+        } catch(Exception e) {
+            throw new RuntimeException("LOT 등록 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+
+
 
 
 }

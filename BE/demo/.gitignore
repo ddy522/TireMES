@@ -40,3 +40,7 @@ Thumbs.db
 # 기타
 # ==========================
 # Help.md 등은 올리려면 제외하지 않음
+
+#Maven
+/target/
+**/target/

@@ -67,8 +67,8 @@ async function onBulkStart({ workNos, count }) {
     console.log('선택된 목록:', workNos)
     console.log('PI 응답 :', piResp)
 
-    alert(`predict success: status=${piResp?.status}, actual_count=${piResp?.actual_count}`)
-   
+   console.log(`predict success: status=${piResp?.status}, actual_count=${piResp?.actual_count}`)
+   alert("검사 시작하시겠습니까?")
     // 라즈베리 응답까지 끝나면 상세 페이지로 이동
     router.push({
       name: 'InspectionDetail',
@@ -135,11 +135,18 @@ async function insertLot() {
       alert(result.message)
     }
 
+<<<<<<< HEAD
   }
    catch (e) {
     // 네트워크 오류나 서버 예외 처리
     console.error(e)
     // alert("등록 중 오류가 발생했습니다.")
+=======
+  } catch (e) {
+    // 네트워크 오류나 서버 예외 처리
+    console.error(e)
+    alert("등록 중 오류가 발생했습니다.")
+>>>>>>> jiyun
   }
 }
 
