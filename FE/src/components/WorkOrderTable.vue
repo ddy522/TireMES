@@ -46,6 +46,7 @@
             </th>
             <th class="px-3 py-2 text-left">작업지시번호</th>
             <th class="px-3 py-2 text-left">제품명</th>
+            <th v-if="isCuring" class="px-3 py-2 text-center">금형틀</th>
             <th class="px-3 py-2 text-right">수량</th>
             <th class="px-3 py-2 text-center">상태</th>
             <th class="px-3 py-2 text-center">우선순위</th>
@@ -66,6 +67,7 @@
 
             <td class="px-3 py-2">{{ order.workNo }}</td>
             <td class="px-3 py-2">{{ order.partName }}</td>
+            <td v-if="isCuring" class="px-3 py-2 text-center">{{ order.std }}</td>
             <td class="px-3 py-2 text-right">{{ order.qty }}</td>
             <td class="px-3 py-2 text-center">
               <span :class="[statusClass(order.workStatus), 'badge']">
@@ -83,7 +85,10 @@
             </td>
           </tr>
           <tr v-if="!loading && orders.length === 0">
-            <td :colspan="isInspection ? 8 : 7" class="px-3 py-6 text-center text-gray-500">데이터가 없습니다.</td>
+             <td :colspan="isInspection ? (isCuring ? 9 : 8) : (isCuring ? 8 : 7)"
+                class="px-3 py-6 text-center text-gray-500">
+              데이터가 없습니다
+              </td>
           </tr>
         </tbody>
       </table>
@@ -129,6 +134,7 @@ function getEngFromRoute() {
 }
 
 const isInspection = computed(() => filters.value.processNameEng === 'inspection') // ✅
+const isCuring = computed(() => filters.value.processNameEng === 'curing')
 
 async function loadInitial() {
   const eng = getEngFromRoute()
@@ -237,7 +243,10 @@ function toggleAll(ev) {
 
 function emitBulkStart() {
   if (selected.value.size === 0) return
-  emit('bulk-start', Array.from(selected.value)) // ✅ 부모에서 일괄 시작 처리
+  emit('bulk-start', {
+    workNos: Array.from(selected.value),
+    count: selected.value.size   // ✅ 개수도 함께 전달
+  })
 }
 </script>
 

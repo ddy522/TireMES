@@ -16,6 +16,7 @@ public class WorkSheetModel {
     private String workStatus;
     private String processNameEng;
     private String worksheetSkey;
+    private String std;
 }
 
 
