@@ -15,7 +15,7 @@
         w.skey AS worksheetSkey
         FROM worksheet w
         LEFT JOIN part p ON w.part_code = p.part_code
-        WHERE w.work_no = #{workNo} and w.process_code = '02'
+        WHERE w.work_no = #{workNo} and w.process_code = #{process} and w.useyn = 'Y'
     </select>
 
     <!-- 작업번호로 BOM 상세정보 조회 -->
@@ -48,6 +48,7 @@
         FROM worksheet
         WHERE work_no = #{workNo} and process_code = '02'
         )
+
     </select>
 
 

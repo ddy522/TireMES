@@ -32,9 +32,9 @@ public class MixingDetailController {
      */
     @GetMapping("/worksheet/{workNo}")
     public ResponseEntity<MixingDetailWorksheet> getWorksheetDetails(
-            @PathVariable String workNo) {
+            @PathVariable String workNo, @RequestParam String process) {
 
-        MixingDetailWorksheet worksheet = mixingDetailService.getWorksheetDetails(workNo);
+        MixingDetailWorksheet worksheet = mixingDetailService.getWorksheetDetails(workNo,process);
 
         if (worksheet != null) {
             return ResponseEntity.ok(worksheet);
@@ -87,7 +87,7 @@ public class MixingDetailController {
     public ResponseEntity<MixingDetailResponse> getCompleteDetails(
             @PathVariable String workNo) {
 
-        MixingDetailWorksheet worksheet = mixingDetailService.getWorksheetDetails(workNo);
+        MixingDetailWorksheet worksheet = mixingDetailService.getWorksheetDetails(workNo,"02");
         List<MixingDetailBom> bomList = mixingDetailService.getBomDetailsByWorkNo(workNo);
 
         if (worksheet != null) {

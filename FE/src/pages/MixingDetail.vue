@@ -13,38 +13,12 @@
       <!-- 좌측 컬럼: 작업지시 정보 / BOM 관리 -->
       <div class="space-y-6">
         <!-- 작업지시 정보 -->
-        <div class="card">
-          <h3 class="section-title">작업지시 정보</h3>
-          <div v-if="loading && !worksheetInfo" class="text-center text-gray-500 py-4">
-            작업지시 정보를 불러오는 중...
-          </div>
-          <div v-else-if="error && !worksheetInfo" class="text-center text-red-500 py-4">{{ error }}</div>
-          <div v-else-if="worksheetInfo" class="flex items-center gap-4">
-            <div class="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center">
-              <span class="text-3xl">🛞</span>
-            </div>
-            <div class="text-sm">
-              <div class="text-gray-500">작업지시번호</div>
-              <div class="font-semibold text-gray-900">{{ worksheetInfo.workNo }}</div>
-              <div class="mt-2 grid grid-cols-3 gap-4">
-                <div>
-                  <div class="text-gray-500">제품명</div>
-                  <div class="font-medium">{{ worksheetInfo.partName }}</div>
-                </div>
-                <div>
-                  <div class="text-gray-500">계획수량</div>
-                  <div class="font-medium">{{ worksheetInfo.qty }}개</div>
-                </div>
-                <div>
-                  <div class="text-gray-500">진행상태</div>
-                  <span :class="getWorkStateClass(worksheetInfo.workState)">
-                    {{ getWorkStateText(worksheetInfo.workState) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <WorksheetInfoCard 
+          :worksheet-info="worksheetInfo" 
+          :loading="loading" 
+          :error="error" 
+          process="02"
+        />
 
         <!-- BOM 관리 -->
         <div class="card">
@@ -115,7 +89,11 @@
             <h3 class="section-title">LOT 관리 시스템</h3>
             <div class="text-xs text-gray-500">작업지시 {{ id }}의 LOT 현황 및 관리</div>
           </div>
-          <LotList :lots="lots" class="mt-4" />
+          <LotList 
+            :lots="lots" 
+            v-model:worksheetSkey="worksheetSkey" 
+            class="mt-4" 
+          />
         </div>
       </div>
       <!-- 우측 컬럼 end -->
@@ -127,6 +105,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LotScanInput from '../components/LotScanInput.vue'
+import WorksheetInfoCard from '../components/WorksheetInfoCard.vue'
 import BomMaterialList from '../components/BomMaterialList.vue'
 import LotList from '../components/LotList.vue'
 import ProductionCompleteForm from '../components/ProductionCompleteForm.vue'
@@ -173,11 +152,17 @@ async function fetchWorksheetDetails() {
   try {
     loading.value = true
     error.value = ''
-    const res = await fetch(`http://localhost:8080/api/mixing-detail/worksheet/${id}`)
+
+    const process = '02'  // 공정 코드
+    const res = await fetch(`http://localhost:8080/api/mixing-detail/worksheet/${id}?process=${process}`)
     if (!res.ok) throw new Error(`작업지시서 정보를 가져올 수 없습니다: ${res.status}`)
+
     worksheetInfo.value = await res.json()
-  } catch (err) { error.value = err.message }
-  finally { loading.value = false }
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loading.value = false
+  }
 }
 
 async function fetchBomDetails() {

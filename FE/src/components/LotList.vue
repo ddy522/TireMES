@@ -1,39 +1,45 @@
 <template>
-  <div class="space-y-3">
+  <div class="space-y-4">
     <!-- LOT 목록 헤더 -->
-    <div class="flex items-center justify-between mb-1">
-      <h4 class="section-title">LOT 목록</h4>
-      <div class="text-xs text-gray-500">{{ lots.length }}개 LOT</div>
+    <div class="flex items-center justify-between mb-2">
+      <h4 class="section-title text-xl font-bold">LOT 목록</h4>
+      <div class="text-sm text-gray-500">{{ lots.length }}개 LOT</div>
     </div>
 
     <!-- LOT 카드 반복 -->
-    <div v-for="lot in lots" :key="lot.no" class="border rounded-md p-3">
-      <div class="flex items-start justify-between">
-        <div>
-          <div class="font-medium text-gray-900">{{ lot.no }}</div>
-          <div class="text-xs text-gray-500">{{ lot.qty }}개 · 생성: {{ lot.createdAt }}</div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span :class="badgeClass(lot.status)" class="badge">{{ lot.status }}</span>
+    <div v-for="lot in lots" :key="lot.lotno" class="border rounded-xl p-4 shadow-md hover:shadow-lg transition bg-white">
+      <!-- 상단 LOT 번호 + 상태 -->
+      <div class="flex justify-between items-center mb-3">
+        <div class="space-y-1">
+          <div class="text-lg font-semibold text-gray-900">LOTNO : {{ lot.lotno }}</div>
+          <div class="text-sm text-gray-500">{{ lot.lotDate }} · 생성: {{ lot.createdAt }}</div>
         </div>
       </div>
 
-      <div class="mt-2 flex gap-2 text-xs">
-        <div class="card flex-1">
-          <div class="text-gray-500">현재 공정</div>
-          <div class="font-medium">{{ lot.currentProc }}</div>
+      <!-- 개별 정보 박스 -->
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="border rounded-lg p-3 bg-gray-50">
+          <div class="text-gray-500 text-sm">품번</div>
+          <div class="font-semibold text-gray-800">{{ lot.partCode }}</div>
         </div>
-        <div class="card flex-1">
-          <div class="text-gray-500">공정 이력</div>
-          <div class="flex flex-wrap gap-1">
-            <span v-for="p in lot.history" :key="p" class="badge badge-gray">{{ p }}</span>
-          </div>
+        <div class="border rounded-lg p-3 bg-gray-50">
+          <div class="text-gray-500 text-sm">품명</div>
+          <div class="font-semibold text-gray-800">{{ lot.partName }}</div>
+        </div>
+        <div class="border rounded-lg p-3 bg-gray-50">
+          <div class="text-gray-500 text-sm">수량</div>
+          <div class="font-semibold text-gray-800">{{ lot.qty }}개</div>
+        </div>
+        <div class="border rounded-lg p-3 bg-gray-50">
+          <div class="text-gray-500 text-sm">공정번호</div>
+          <div class="font-semibold text-gray-800">{{ lot.processNo }}</div>
         </div>
       </div>
 
-      <div class="mt-3 flex justify-end gap-2">
-        <button class="btn bg-white border" @click="openModal(lot)">🔍 추적</button>
-        <button class="btn bg-red-500 text-white border" @click="deleteLot(lot.no)">LOT 삭제</button>
+      <!-- 버튼 -->
+      <div class="flex justify-end gap-2">
+        <button class="btn bg-white border text-sm px-3 py-1 hover:bg-gray-100 transition" @click="openModal(lot)">🔍 추적</button>
+        <button class="btn bg-red-500 text-white border text-sm px-3 py-1 hover:bg-red-600 transition" @click="deleteLot(lot.lotno)">LOT 삭제</button>
       </div>
     </div>
 
@@ -41,7 +47,7 @@
     <div v-if="showModal" class="fixed inset-0 bg-black/50 flex justify-center items-start pt-20 z-50">
       <div class="bg-white rounded-lg shadow-lg w-[600px] max-h-[80vh] overflow-y-auto p-4">
         <div class="flex justify-between items-center mb-3">
-          <h5 class="font-bold text-lg">{{ selectedLot.no }} 세부 추적</h5>
+          <h5 class="font-bold text-lg">{{ selectedLot.lotno }} 세부 추적</h5>
           <button @click="closeModal" class="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
 
@@ -50,17 +56,21 @@
           <thead class="bg-gray-100">
             <tr>
               <th class="border px-2 py-1 text-left">LOT 번호</th>
-              <th class="border px-2 py-1 text-left">공정</th>
+              <th class="border px-2 py-1 text-left">공정번호</th>
               <th class="border px-2 py-1 text-left">작업일자</th>
-              <th class="border px-2 py-1 text-left">작업수량</th>
+              <th class="border px-2 py-1 text-left">수량</th>
+              <th class="border px-2 py-1 text-left">품번</th>
+              <th class="border px-2 py-1 text-left">품명</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td class="border px-2 py-1">{{ selectedLot.no }}</td>
-              <td class="border px-2 py-1">{{ selectedLot.currentProc }}</td>
+              <td class="border px-2 py-1">{{ selectedLot.lotno }}</td>
+              <td class="border px-2 py-1">{{ selectedLot.processNo }}</td>
               <td class="border px-2 py-1">{{ selectedLot.createdAt }}</td>
               <td class="border px-2 py-1">{{ selectedLot.qty }}</td>
+              <td class="border px-2 py-1">{{ selectedLot.partCode }}</td>
+              <td class="border px-2 py-1">{{ selectedLot.partName }}</td>
             </tr>
           </tbody>
         </table>
@@ -70,49 +80,65 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
-  import axios from 'axios'
+import { ref, watch, onMounted, defineExpose } from 'vue'
+import axios from 'axios'
 
-  const lots = ref([])         // LOT 데이터 저장
-  const showModal = ref(false) // 모달 상태
-  const selectedLot = ref({})  // 선택된 LOT
+const props = defineProps({
+  worksheetSkey: String
+})
 
-  // API 호출해서 LOT 목록 가져오기
-  async function fetchLots() {
-    try {
-      const res = await axios.get('http://localhost:8080/api/lots') // Spring API
-      lots.value = res.data
-    } catch (e) {
-      console.error('LOT 불러오기 실패:', e)
-    }
+const lots = ref([])
+const showModal = ref(false)
+const selectedLot = ref({})
+const loading = ref(false)
+
+// LOT 조회
+async function fetchLots(skey) {
+  if (!skey) return
+  try {
+    loading.value = true
+    const res = await axios.get(`http://localhost:8080/api/lot/lotList/${skey}`)
+    lots.value = res.data
+  } catch (e) {
+    console.error('LOT 불러오기 실패:', e)
+    lots.value = []
+  } finally {
+    loading.value = false
   }
+}
 
-  onMounted(() => {
-    fetchLots()
-  })
+// prop 변경 시 자동 갱신
+watch(() => props.worksheetSkey, (newSkey) => {
+  if (newSkey) fetchLots(newSkey)
+})
 
-  // 상태별 뱃지 스타일
-  function badgeClass(status) {
-    if (status === '완료') return 'badge-green'
-    if (status === '진행중') return 'badge-blue'
-    if (status === '대기') return 'badge-gray'
-    return 'badge-gray'
+// 처음 마운트
+onMounted(() => {
+  if (props.worksheetSkey) fetchLots(props.worksheetSkey)
+})
+
+// fetchLots를 부모에서 호출 가능하게 노출
+defineExpose({ fetchLots })
+
+// 모달 열기/닫기
+function openModal(lot) {
+  selectedLot.value = lot
+  showModal.value = true
+}
+function closeModal() {
+  showModal.value = false
+}
+
+// LOT 삭제
+async function deleteLot(lotno) {
+  if (!props.worksheetSkey) return
+  try {
+    await axios.delete(`http://localhost:8080/api/lot/deleteLot`, {
+      params: { lotNo: lotno, worksheetSkey: props.worksheetSkey }
+    })
+    lots.value = lots.value.filter(l => l.lotno !== lotno)
+  } catch (e) {
+    console.error('LOT 삭제 실패:', e)
   }
-
-  // 모달 열기
-  function openModal(lot) {
-    selectedLot.value = lot
-    showModal.value = true
-  }
-
-  // 모달 닫기
-  function closeModal() {
-    showModal.value = false
-  }
-
-  // LOT 삭제 (프론트에서만 삭제됨)
-  function deleteLot(no) {
-    const idx = lots.value.findIndex(l => l.no === no)
-    if (idx !== -1) lots.value.splice(idx, 1)
-  }
+}
 </script>

@@ -8,10 +8,16 @@
 
     <!-- 1. LOT와 작업지시 연결 여부 확인 -->
     <select id="isLotLinkedToWorkOrder" resultType="boolean" parameterType="string">
+<!--        SELECT count(w.work_no) > 0-->
+<!--        FROM lot l-->
+<!--        INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'-->
+<!--        INNER JOIN worksheet w ON w.skey = s.p_skey-->
+<!--        WHERE l.lotno = #{lotNo}-->
+
+
         SELECT count(w.work_no) > 0
         FROM lot l
-        INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'
-        INNER JOIN worksheet w ON w.skey = s.p_skey
+        INNER JOIN worksheet w ON w.skey = l.r_skey
         WHERE l.lotno = #{lotNo}
     </select>
 

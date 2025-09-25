@@ -26,8 +26,8 @@ public class MixingDetailService {
      * @param workNo 작업번호
      * @return 작업지시서 상세정보
      */
-    public MixingDetailWorksheet getWorksheetDetails(String workNo) {
-        return mixingDetailMapper.selectWorksheetDetails(workNo);
+    public MixingDetailWorksheet getWorksheetDetails(String workNo, String process) {
+        return mixingDetailMapper.selectWorksheetDetails(workNo, process);
     }
 
     /**

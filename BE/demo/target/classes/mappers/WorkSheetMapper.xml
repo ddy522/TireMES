@@ -22,18 +22,18 @@
     <!--전체 작업지시 조회 -->
     <select id="findAllWorkList" resultMap="WorkSheetMap">
         SELECT
-        w.work_no,
-        w.deadline,
-        w.priority,
-        w.part_code,
-        w.process_code,
-        w.qty,
-        w.work_state,
-        p.part_name,
-        w.skey as worksheetSkey
+            w.work_no,
+            w.deadline,
+            w.priority,
+            w.part_code,
+            w.process_code,
+            w.qty,
+            w.work_state,
+            p.part_name,
+            w.skey as worksheetSkey
         FROM worksheet w
-        LEFT JOIN part p
-        ON w.part_code = p.part_code
+        LEFT JOIN part p ON w.part_code = p.part_code
+        WHERE w.useyn = 'Y'
     </select>
 
     <!--공정별 작업지시 조회  : process_name_eng 받아서 -->
@@ -55,6 +55,7 @@
         LEFT JOIN `process` pr
         ON w.process_code = pr.process_no
         WHERE pr.process_name_eng = #{processNameEng}
+        AND w.useyn = 'Y'
     </select>
 
     <!-- 추가: 선택 조건 검색 -->
@@ -90,6 +91,7 @@
             <if test="workNo != null and workNo != ''">
                 AND w.work_no LIKE CONCAT('%', #{workNo}, '%')
             </if>
+            AND w.useyn = 'Y'
         </where>
         ORDER BY w.deadline ASC, w.work_no DESC
     </select>

@@ -15,7 +15,7 @@ public interface MixingDetailMapper {
      * @param workNo 작업번호
      * @return 작업지시서 상세정보
      */
-    MixingDetailWorksheet selectWorksheetDetails(@Param("workNo") String workNo);
+    MixingDetailWorksheet selectWorksheetDetails(@Param("workNo") String workNo, @Param("process") String process);
 
     /**
      * 작업번호로 BOM 상세정보 조회

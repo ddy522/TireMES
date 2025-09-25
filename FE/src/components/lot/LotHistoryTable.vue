@@ -8,26 +8,23 @@
     <table class="min-w-full text-sm">
       <thead>
         <tr class="bg-gray-100 text-gray-700">
-          <th class="px-3 py-2 text-left">순번</th>
           <th class="px-3 py-2 text-left">공정</th>
-          <th class="px-3 py-2 text-left">부여 LOT 번호</th>
+          <th class="px-3 py-2 text-left">LOT 번호</th>
+          <th class="px-3 py-2 text-left">품번</th>
+          <th class="px-3 py-2 text-left">품명</th>
           <th class="px-3 py-2 text-right">수량</th>
-          <th class="px-3 py-2 text-left">상태</th>
-          <th class="px-3 py-2 text-left">작업자</th>
-          <th class="px-3 py-2 text-left">발생 시각</th>
+          <th class="px-3 py-2 text-left">등록시각</th>
+          
         </tr>
       </thead>
       <tbody>
         <tr v-for="r in rows" :key="r.order" class="border-t">
-          <td class="px-3 py-2">{{ r.order }}</td>
-          <td class="px-3 py-2">{{ r.process }}</td>
-          <td class="px-3 py-2 font-medium">{{ r.lotNo }}</td>
+          <td class="px-3 py-2 text-left">{{ r.processName }}</td>
+          <td class="px-3 py-2 text-left font-medium">{{ r.lotno }}</td>
+          <td class="px-3 py-2 text-left">{{ r.partCode }}</td>
+          <td class="px-3 py-2 text-left">{{ r.partName }}</td>
           <td class="px-3 py-2 text-right">{{ r.qty }}</td>
-          <td class="px-3 py-2">
-            <span :class="badge(r.status)" class="badge">{{ r.status }}</span>
-          </td>
-          <td class="px-3 py-2">{{ r.operator }}</td>
-          <td class="px-3 py-2">{{ r.timestamp }}</td>
+          <td class="px-3 py-2 text-left">{{ r.createdAt }}</td>
         </tr>
       </tbody>
     </table>
