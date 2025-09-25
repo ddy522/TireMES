@@ -18,6 +18,7 @@ public class LotTrackingController {
     // LOT 하나 기준으로 관련 공정/이력 전체 반환
     @GetMapping("/{lotNo}")
     public List<LotTrackingModel> getLotTracking(@PathVariable String lotNo) {
+        System.out.println("lotno:" + lotNo);
         return lotTrackingService.getLotTrackingByLotNo(lotNo);
     }
 }

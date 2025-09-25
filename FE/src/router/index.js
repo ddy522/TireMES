@@ -27,7 +27,7 @@ import DashBoard from '../pages/Dashboard.vue'
 import EquipmentDashboard from '../pages/EquipmentDashboard.vue'
 
 const routes = [
-  { path: '/', redirect: '/dashbord' },
+  { path: '/', redirect: '/dashboard' },
   { path: '/dashboard', name: 'DashBoard', component: DashBoard },
   { path: '/mixing', name: 'MixingList', component: MixingList },
   { path: '/mixing/:id', name: 'MixingDetail', component: MixingDetail, props: true, meta: { process: 'mixing' } },

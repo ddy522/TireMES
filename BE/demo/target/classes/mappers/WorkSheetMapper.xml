@@ -70,7 +70,8 @@
         w.qty,
         w.work_state,
         p.part_name,
-        pr.process_name_eng
+        pr.process_name_eng,
+        w.skey as worksheetSkey
         FROM worksheet w
         LEFT JOIN part p
         ON w.part_code = p.part_code
