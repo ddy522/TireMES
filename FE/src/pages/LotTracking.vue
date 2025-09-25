@@ -34,13 +34,13 @@
             <div class="text-gray-500">시작 시간</div>
             <div class="font-medium">{{ currentLot.createdAt }}</div>
           </div>
-          <div class="min-w-56">
+          <!-- <div class="min-w-56">
             <div class="text-gray-500 mb-1">진행률</div>
             <div class="w-full bg-gray-100 h-2 rounded">
               <div class="h-2 rounded bg-gray-800" :style="{ width: progress + '%' }"></div>
             </div>
             <div class="text-right text-xs mt-1">{{ progress }}%</div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -71,9 +71,12 @@ const progress = computed(() => {
 function search() {
   if (!lotInput.value) return
 
+  console.log("lot:",lotInput.value);
+
   axios.get(`/api/lot-tracking/${lotInput.value}`)
     .then(res => {
       const data = res.data  // data는 배열
+      console.log(data);
 
       if (!data || data.length === 0) {
         alert('조회된 LOT가 없습니다.')
@@ -83,18 +86,23 @@ function search() {
         return
       }
 
-      // 마지막 LOT(가장 최근 공정)를 요약 정보로 사용
-      const latestLot = data[data.length - 1]
+      // 🔹 검색한 LOT 번호와 일치하는 데이터를 찾음
+      const searchedLot = data.find(l => l.lotno === lotInput.value)
+
+      // 🔹 못 찾으면 fallback으로 마지막 LOT 사용
+      const lotInfo = searchedLot || data[data.length - 1]
+
+      // currentLot에 설정
       currentLot.value = {
-        lotno: latestLot.lotno,
-        partName: latestLot.partName,
-        processName: latestLot.processName,
-        createdAt: latestLot.createdAt,
-        partCode: latestLot.partCode,
-        qty: latestLot.qty
+        lotno: lotInfo.lotno,
+        partName: lotInfo.partName,
+        processName: lotInfo.processName,
+        createdAt: lotInfo.createdAt,
+        partCode: lotInfo.partCode,
+        qty: lotInfo.qty
       }
 
-      // steps: 각 공정을 상태 완료로 표시 (임시)
+      // steps: 각 공정을 완료 처리 (임시)
       steps.value = data.map(l => ({
         status: '완료',
         processName: l.processName
@@ -116,5 +124,6 @@ function search() {
       alert('LOT 조회 중 오류가 발생했습니다.')
     })
 }
+
 
 </script>
