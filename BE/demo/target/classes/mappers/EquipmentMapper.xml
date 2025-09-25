@@ -9,32 +9,46 @@
         SELECT
         <choose>
             <when test="scale == 'minute'">
-                DATE_FORMAT(plc_data, '%Y-%m-%d %H:%i') AS label
+                TIME_FORMAT(plc_data, '%H:%i') AS label
             </when>
             <when test="scale == 'hour'">
-                DATE_FORMAT(plc_data, '%Y-%m-%d %H') AS label
+                HOUR(plc_data) AS label
             </when>
             <otherwise>
                 DATE(plc_data) AS label
             </otherwise>
         </choose>,
-        AVG(value) AS value
+        AVG(value) AS value,
+        gubun
         FROM plc_data
-        WHERE machine = 'M001'
-        AND gubun = #{metric}
+        WHERE machine = #{eqId}
+        <choose>
+            <when test="scale == 'minute'">
+                AND DATE(plc_data) = CURDATE()
+            </when>
+            <when test="scale == 'hour'">
+                AND DATE(plc_data) = CURDATE()
+            </when>
+            <otherwise>
+                AND plc_data >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+            </otherwise>
+        </choose>
+        <if test="metric != null and metric != ''">
+            AND gubun = #{metric}
+        </if>
         GROUP BY
         <choose>
             <when test="scale == 'minute'">
-                DATE_FORMAT(plc_data, '%Y-%m-%d %H:%i')
+                DATE_FORMAT(plc_data, '%H:%i')
             </when>
             <when test="scale == 'hour'">
-                DATE_FORMAT(plc_data, '%Y-%m-%d %H')
+                HOUR(plc_data)
             </when>
             <otherwise>
                 DATE(plc_data)
             </otherwise>
-        </choose>
-        ORDER BY plc_data
+        </choose>, gubun
+        ORDER BY plc_data, gubun
     </select>
 
 </mapper>

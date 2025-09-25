@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor // 생성자 자동 생성
-@CrossOrigin(origins = "http://localhost:5173") // Vite dev 서버 주소
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class getMetricsController {
 
-    private final EquipmentService service; // 생성자 주입
+    private final EquipmentService service;
 
     @GetMapping("/api/equipment/{eqId}/metrics")
     public List<MetricModel> getMetricsController(
             @PathVariable String eqId,
-            @RequestParam String metric, // selectedMetric 값
-            @RequestParam String scale   // chartScale 값
+            @RequestParam String metric, // 파라미터는 받지만 내부에서 무시됨
+            @RequestParam String scale
     ) {
-        // Service 호출 → Mapper 통해 DB 조회
+        // Service에서 metric 파라미터 무시하고 모든 gubun 데이터 반환
         return service.getMetricData(eqId, metric, scale);
     }
 }
