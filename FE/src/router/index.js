@@ -24,6 +24,7 @@ import QualityReports from '../pages/quality/QualityReports.vue'
 import QualityStandards from '../pages/quality/QualityStandards.vue'
 
 import DashBoard from '../pages/Dashboard.vue'
+import EquipmentDashboard from '../pages/EquipmentDashboard.vue'
 
 const routes = [
   { path: '/', redirect: '/dashbord' },
@@ -43,6 +44,7 @@ const routes = [
   { path: '/delivery', name: 'DeliveryList', component: DeliveryList },
   { path: '/materials', name: 'Materials', component: Materials },
   { path: '/lot-tracking', name: 'LotTracking', component: LotTracking },
+  { path: '/equipment', name: 'EquipmentDashboard', component: EquipmentDashboard },
     {
     path: '/quality',
     component: QualityLayout,

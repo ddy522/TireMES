@@ -118,6 +118,9 @@
         <Route class="w-7 h-7 mr-3" />
         로트 추적
       </RouterLink>
+      <RouterLink class="flex items-center w-full text-left px-5 py-4 rounded-md text-lg font-medium hover:bg-gray-100" to="/equipment">
+        설비 관리
+      </RouterLink>
 
       <!-- 보고서 관리 (아이콘 + 비활성 스타일) -->
       <button
