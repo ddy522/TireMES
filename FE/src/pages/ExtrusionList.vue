@@ -85,7 +85,5 @@ async function insertLot() {
     console.error(e)
     alert("등록 중 오류가 발생했습니다.")
   }
-
-  workOrders.value = await fetchWorkOrders()
 }
 </script>

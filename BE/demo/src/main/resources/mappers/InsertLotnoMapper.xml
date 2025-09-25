@@ -28,8 +28,8 @@
             WHERE work_no IN (
                 SELECT w.work_no
                 FROM lot l
-                INNER JOIN skeyconnect s ON s.p_skey = l.skey AND c_table ='worksheet' and s.useyn = 'Y'
-                INNER JOIN worksheet w ON w.skey = s.c_skey
+                INNER JOIN skeyconnect s ON s.c_skey = l.skey AND p_table ='worksheet'
+                INNER JOIN worksheet w ON w.skey = s.p_skey
                 WHERE lotno =#{lotNo}
 
             )

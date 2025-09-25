@@ -14,7 +14,6 @@ public class LotTrackingService {
     private final LotTrackingMapper lotTrackingMapper;
 
     public List<LotTrackingModel> getLotTrackingByLotNo(String lotNo) {
-        System.out.println("serviceLotno : " + lotNo);
         return lotTrackingMapper.selectLotTracking(lotNo);
     }
 

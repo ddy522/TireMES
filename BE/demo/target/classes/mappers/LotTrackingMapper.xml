@@ -6,7 +6,7 @@
 <mapper namespace="com.example.demo.mapper.LotTrackingMapper">
 
     <select id="selectLotTracking" parameterType="string" resultType="com.example.demo.model.LotTrackingModel">
-        CALL sp_trace_lot2(#{lotNo});
+        CALL sp_trace_lot(#{lotNo});
     </select>
 
 </mapper>

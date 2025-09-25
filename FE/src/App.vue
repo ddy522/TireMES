@@ -118,12 +118,7 @@
         <Route class="w-7 h-7 mr-3" />
         로트 추적
       </RouterLink>
-      <RouterLink
-        to="/equipment"
-        class="flex items-center w-full text-left px-5 py-4 rounded-md text-lg font-medium hover:bg-gray-100"
-        :class="$route.path.startsWith('/equipment') ? 'bg-indigo-50 text-indigo-700' : ''"
-      >
-        <Settings class="w-7 h-7 mr-3" />
+      <RouterLink class="flex items-center w-full text-left px-5 py-4 rounded-md text-lg font-medium hover:bg-gray-100" to="/equipment">
         설비 관리
       </RouterLink>
 
@@ -151,6 +146,6 @@
 
 <script setup>
 import { 
-  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap, Shield, LayoutDashboard, Boxes, Route, FileBarChart, Settings
+  Factory, Package, BarChart3, Truck, CheckCircle, RotateCcw, Zap, Shield,LayoutDashboard, Boxes, Route, FileBarChart
 } from 'lucide-vue-next'
 </script>

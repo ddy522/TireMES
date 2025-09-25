@@ -6,8 +6,7 @@
         v-model.number="localDoneQty"
         type="number"
         placeholder="완료된 수량 입력"
-        class="border rounded-md px-3 py-2 text-sm w-20 no-spinner"
-        @keydown="preventMinus"
+        class="border rounded-md px-3 py-2 text-sm w-20"
       />
       <input
         v-model="localRemark"
@@ -63,24 +62,4 @@ function handleSubmit() {
   handleCompleteSubmit({ doneQty: localDoneQty.value, remark: localRemark.value })
   emit('submit') // 부모 컴포넌트 handleComplete 호출
 }
-
-function preventMinus(e) {
-  if (e.key === '-' || e.key === 'e' || e.key === '+' ) {
-    e.preventDefault()
-  }
-}
 </script>
-
-<style scoped>
-/* Chrome, Edge, Safari */
-.no-spinner::-webkit-outer-spin-button,
-.no-spinner::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-.no-spinner[type=number] {
-  -moz-appearance: textfield;
-}
-</style>

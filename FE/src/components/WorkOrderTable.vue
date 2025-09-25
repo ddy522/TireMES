@@ -30,7 +30,7 @@
         v-model="filters.workNo"
         placeholder="작업지시 번호"
         class="border rounded px-3 py-2 text-sm flex-1"
-        @keyup.enter="onSearch"   
+        @keyup.enter="onSearch"
       />
       <button class="btn-primary" @click="onSearch">조회</button>
       <button class="border rounded px-3 py-2 text-sm" @click="onReset">초기화</button>
