@@ -345,37 +345,39 @@
   function getWindowLen(scale){ return scale==='minute'?60:scale==='hour'?24:30 }
   function getTotalLen(scale){  return getWindowLen(scale) * 3 } // 예: 3배 길이(슬라이드 용 더미)
   
-  function updateChartForMetric() {
-    if (!metricChart) return
-    const winLen   = getWindowLen(chartScale.value)
-    const totalLen = getTotalLen(chartScale.value)
-  
-    // 이동 가능 범위 계산
-    rangeMax.value = Math.max(totalLen - winLen, 0)
-    if (rangeOffset.value > rangeMax.value) rangeOffset.value = rangeMax.value
-  
-    const fullLabels = makeFullLabels(chartScale.value, totalLen)
-    const fullData   = makeFullSeries(chartScale.value, selectedMetric.value, totalLen)
-  
-    // 현재 창(slice)
-    const s = rangeOffset.value
-    const e = s + winLen
-    const labels = fullLabels.slice(s, e)
-    const data   = fullData.slice(s, e)
-  
+  import axios from 'axios'
+
+async function updateChartForMetric() {
+  if (!metricChart) return
+
+  try {
+    const res = await axios.get(`/api/equipment/${selEqId.value}/metrics`, {
+      params: {
+        metric: selectedMetric.value,  // ← 여기가 핵심! 온도/습도/전력 등 선택 항목
+        scale: chartScale.value         // minute/hour/day
+      }
+    })
+
+    const apiData = res.data
+    const labels = apiData.map(d => d.label)
+    const data   = apiData.map(d => d.value)
     const color  = metricColor[selectedMetric.value] ?? '#2563eb'
+
     metricChart.data.labels = labels
     metricChart.data.datasets[0].label = labelOf(selectedMetric.value)
     metricChart.data.datasets[0].data  = data
     metricChart.data.datasets[0].borderColor = color
     metricChart.data.datasets[0].pointBackgroundColor = color
-  
-    // 축 제목도 함께 동기화
+
     metricChart.options.scales.x.title.text = timeUnit(chartScale.value)
     metricChart.options.scales.y.title.text = labelOf(selectedMetric.value)
-  
+
     metricChart.update()
+  } catch (err) {
+    console.error("차트 데이터 불러오기 실패", err)
   }
+}
+
   
   /* 시간축 이동 버튼 */
   function goStart(){ rangeOffset.value = 0; updateChartForMetric() }
