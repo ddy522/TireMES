@@ -94,7 +94,8 @@
   import ProductionCompleteForm from '../components/ProductionCompleteForm.vue'
   import WorksheetInfoCard from '../components/WorksheetInfoCard.vue'
   const sopImg = new URL('../assets/sop/work-instruction.png', import.meta.url).href
-  
+  const sopDlg = ref(null)
+
   const route = useRoute()
   const id = route.params.id
   

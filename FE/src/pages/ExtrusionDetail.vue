@@ -97,6 +97,8 @@ import WorksheetInfoCard from '../components/WorksheetInfoCard.vue'
 const route = useRoute()
 const id = route.params.id
 
+const sopDlg = ref(null)
+
 // 생산완료처리
 const doneQty = ref(0)
 const quality = ref('합격')
@@ -109,6 +111,9 @@ const loading = ref(false)
 const error = ref('')
 const worksheetInfo = ref(null)
 const worksheetSkey = computed(() => worksheetInfo.value?.worksheetSkey || '')
+
+const showModal = ref(false) // 👈 이 부분이 반드시 존재해야 함
+const modalTitle = ref('')
 
 const sopImg = new URL('../assets/sop/work-instruction.png', import.meta.url).href
 // LOT 관리
@@ -157,6 +162,7 @@ function handleComplete() {
     console.warn("LotList ref 또는 worksheetSkey가 아직 준비되지 않음")
   }
 }
+
 
 
 onMounted(() => {

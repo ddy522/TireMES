@@ -94,6 +94,8 @@
   const sopImg = new URL('../assets/sop/work-instruction.png', import.meta.url).href
   const route = useRoute()
   const id = route.params.id
+  const sopDlg = ref(null)
+
   
   // 생산완료처리
   const doneQty = ref(0)
