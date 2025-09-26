@@ -55,7 +55,7 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import LotHistoryTable from '../components/lot/LotHistoryTable.vue'
 
-const lotInput = ref('0320250924002')  // 기본값 샘플
+const lotInput = ref('')  // 기본값 샘플
 const currentLot = ref(null)
 const steps = ref([])
 const historyRows = ref([])

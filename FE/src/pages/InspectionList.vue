@@ -135,18 +135,12 @@ async function insertLot() {
       alert(result.message)
     }
 
-<<<<<<< HEAD
-  }
-   catch (e) {
-    // 네트워크 오류나 서버 예외 처리
-    console.error(e)
-    // alert("등록 중 오류가 발생했습니다.")
-=======
+
   } catch (e) {
     // 네트워크 오류나 서버 예외 처리
     console.error(e)
     alert("등록 중 오류가 발생했습니다.")
->>>>>>> jiyun
+
   }
 }
 

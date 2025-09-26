@@ -110,7 +110,7 @@ const error = ref('')
 const worksheetInfo = ref(null)
 const worksheetSkey = computed(() => worksheetInfo.value?.worksheetSkey || '')
 
-
+const sopImg = new URL('../assets/sop/work-instruction.png', import.meta.url).href
 // LOT 관리
 const lots = ref([
   { no: 'LOT-W0001-001', qty: 25, createdAt: '14:30', status: '완료', currentProc: '재단', quality: '합격', history: ['믹싱', '압출'] },

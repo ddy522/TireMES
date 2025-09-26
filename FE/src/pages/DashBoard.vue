@@ -279,7 +279,8 @@ const EBarLine = defineComponent({
       return {
         tooltip:{ trigger:'axis' },
         legend:{ data:['계획','실적','달성(%)'] },
-        grid:{ left:40, right:40, top:40, bottom:30 },
+        // grid:{ left:40, right:40, top:40, bottom:30 }
+        grid:{ left:40, right:40, top:40, bottom:40, containLabel: true },
         xAxis:{ type:'category', data: labels },
         yAxis:[ { type:'value', name:'수량' }, { type:'value', name:'%', min:0, max:120 } ],
         series:[
